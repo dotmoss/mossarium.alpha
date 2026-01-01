@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/Mossarium.Alpha.UI.Windowing/Mossarium.Alpha.UI.Windowing.csproj" Id="a67ab414-2b35-4d83-b674-055a4468551c">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="src/Mossarium.Alpha.UI/Mossarium.Alpha.UI.csproj" Id="a623fcdf-f6aa-44b2-b8be-cf96b279b175">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="src/Mossarium.Alpha/Mossarium.Alpha.csproj" Id="de7dddff-a4ca-49ea-a179-2d778e7d0a4c">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="src/OpenGL/OpenGL.csproj" Id="ae1feaf1-4864-4bee-a810-3137526d871c">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="src/WindowsOS/WindowsOS.csproj" Id="0793d498-99a5-4781-8a7c-a3dd47fbf4d3">
+    <Platform Project="x64" />
+  </Project>
+</Solution>

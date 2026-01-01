@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Mossarium.Alpha": {
+      "commandName": "Project",
+      "commandLineArgs": "DOTNET_GCStress=1"
+    }
+  }
+}
