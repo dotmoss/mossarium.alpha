@@ -20,14 +20,8 @@ public unsafe class Window : SystemWindow
     {
         SetWindowAttributes(attributes);
 
-        glContext = new WindowGLContext(HandleToDeviceContext);
-        frameRateWatcher = new Stopwatch();
-        frameTimer = new HighAccuracyWaitableTimer();
     }
 
-    WindowGLContext glContext;
-    Stopwatch frameRateWatcher;
-    HighAccuracyWaitableTimer frameTimer;
     FrameRate frameRate = DefaultFrameRate;
     int framesBeforeRest;
 
@@ -58,36 +52,56 @@ public unsafe class Window : SystemWindow
 
     protected virtual void OnInitialized() { }
 
-    protected override void OnRender()
+    protected override void OnMessageLoopStarted()
     {
-        frameRateWatcher.Restart();
+        var thread = new Thread(StartRenderLoop)
+        {
+            Name = $"UI Render Loop Thread 0x{Handle:X}"
+        };
+        
+        thread.Start();
+    }
 
-        framesBeforeRest--;
-        if (framesBeforeRest == 0)
-            frameRate = InRestFrameRate;
-
+    protected virtual void OnRender()
+    {
         GL.Clear(0x4000 | 0x100);
 
         GL.ClearColor(Random.Shared.NextSingle(), 0, 0, 1);
 
-        GL.SwapBuffers(HandleToDeviceContext);  
-        base.OnRender();
-
-        var spentOnFrame = frameRateWatcher.Elapsed.TotalMilliseconds;
-        var timeToSpend = frameRate.FrameDelay - spentOnFrame;
-        if (timeToSpend > 0)
-        {
-            var nanoseconds = (long)(timeToSpend * 10000);
-            frameTimer.Wait(nanoseconds);
-        }
+        GL.SwapBuffers(HandleToDeviceContext);
     }
 
-    protected override void OnClose()
+    void StartRenderLoop()
     {
-        glContext.Dispose();
-        frameRateWatcher.Stop();
+        var frameRateWatcher = new Stopwatch();
+        using var frameTimer = new HighAccuracyWaitableTimer();
+        using var glContext = new WindowGLContext(HandleToDeviceContext);
 
-        base.OnClose();
+        while (isRunning)
+        {
+            frameRateWatcher.Restart();
+
+            framesBeforeRest--;
+            if (framesBeforeRest == 0)
+                frameRate = InRestFrameRate;
+
+            OnRender();
+
+            var spentOnFrame = frameRateWatcher.Elapsed.TotalMilliseconds;
+            var timeToSpend = frameRate.FrameDelay - spentOnFrame;
+            if (timeToSpend > 0)
+            {
+                var nanoseconds = (long)(timeToSpend * 10000);
+                frameTimer.Wait(nanoseconds);
+            }
+        }
+
+        frameRateWatcher.Stop();
+    }
+
+    protected override bool OnClose()
+    {
+        return base.OnClose();
     }
 
     protected override unsafe bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)

@@ -50,7 +50,7 @@ public unsafe static class User32
     [DllImport(user), SuppressGCTransition] public static extern
         int DestroyWindow(nint hWnd);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         int GetMessageW(Message* pMsg, nint hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
 
     [DllImport(user), SuppressGCTransition] public static extern 

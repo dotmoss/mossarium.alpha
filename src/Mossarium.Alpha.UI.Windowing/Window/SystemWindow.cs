@@ -13,7 +13,7 @@ public unsafe partial class SystemWindow : IDisposable
         UpdateProperties();
     }
 
-    bool running;
+    protected bool isRunning;
     readonly SystemWindowInternal internalWindow;
     (int X, int Y, int Width, int Height) cachedRectangle;
 
@@ -105,16 +105,15 @@ public unsafe partial class SystemWindow : IDisposable
 
     protected virtual bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
-        //Debug.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
+        Debug.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
 
         switch (message)
         {
             case WindowMessage.Close:
             case WindowMessage.Quit:
             case WindowMessage.Command when wParam == 0x02:
-                {
-                    OnClose();
-                    return false;
+                {                    
+                    return OnClose();
                 }
             case WindowMessage.Char:
                 {
@@ -163,11 +162,10 @@ public unsafe partial class SystemWindow : IDisposable
         }
     }
 
-    protected virtual void OnRender() { }
-
-    protected virtual void OnClose() 
+    protected virtual bool OnClose() 
     {
         Dispose();
+        return true;
     }
 
     protected virtual bool OnKeyPress(Keys key)
@@ -202,27 +200,27 @@ public unsafe partial class SystemWindow : IDisposable
         return true;
     }
 
+    protected virtual void OnMessageLoopStarted() { }
+
     void StartMessageLoop()
     {
-        if (running)
+        if (isRunning)
             throw new Exception($"{nameof(SystemWindow)}->{nameof(StartMessageLoop)}: UI Thread is already running");
-        running = true;
+        isRunning = true;
 
-        Thread.CurrentThread.Name = $"UI Thread 0x{Handle:X}";
+        Thread.CurrentThread.Name = $"UI Message Loop Thread 0x{Handle:X}";
         ThreadLocalInstance = this;
+
+        OnMessageLoopStarted();
 
         User32.SetWindowWndProcFunction(Handle, (nint)(delegate* unmanaged<nint, WindowMessage, ulong, ulong, long>)&WndProc);
         
         Message message;
-        while (running)
+        while (isRunning)
         {
-            while (internalWindow.PeekMessage(&message))
-            {
-                internalWindow.TranslateMessage(&message);
-                internalWindow.DispatchMessage(&message);
-            }
-
-            OnRender();
+            internalWindow.GetMessage(&message);
+            internalWindow.TranslateMessage(&message);
+            internalWindow.DispatchMessage(&message);
         }
 
         ThreadLocalInstance = null;
@@ -242,7 +240,7 @@ public unsafe partial class SystemWindow : IDisposable
 
     public void Dispose()
     {
-        running = false;
+        isRunning = false;
     }
 
     // Otherwise use dynamically compiled thunk. But is not it overengineering? :)
