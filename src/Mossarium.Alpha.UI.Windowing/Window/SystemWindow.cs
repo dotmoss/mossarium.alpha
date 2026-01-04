@@ -105,7 +105,7 @@ public unsafe partial class SystemWindow : IDisposable
 
     protected virtual bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
-        Debug.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
+        //Debug.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
 
         switch (message)
         {

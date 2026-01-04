@@ -26,12 +26,12 @@ public unsafe class WindowGLContext : IDisposable
                 Size = (short)sizeof(PixelFormatDescriptor),
                 Version = 1,
                 PixelType = PixelTypeEnum.RGBA,
-                Flags = FlagsEnum.DrawToBitmap | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
-                ColorBits = 32,
-                AlphaBits = 8,
+                Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
+                ColorBits = 24,
+                AlphaBits = 0,
                 LayerType = LayerTypeEnum.MainPlane,
-                DepthBits = 24,
-                StencilBits = 8
+                DepthBits = 0,
+                StencilBits = 0
             };
             var pixelFormat = GDI32.ChoosePixelFormat(handleToDeviceContext, &pixelFormatDescriptor);
             if (pixelFormat == 0)
@@ -63,9 +63,9 @@ public unsafe class WindowGLContext : IDisposable
             DOUBLE_BUFFER_ARB, 1,
             ACCELERATION_ARB, FULL_ACCELERATION_ARB,
             PIXEL_TYPE_ARB, TYPE_RGBA_ARB,
-            COLOR_BITS_ARB, 32,
-            DEPTH_BITS_ARB, 24,
-            STENCIL_BITS_ARB, 8,
+            COLOR_BITS_ARB, 24,
+            DEPTH_BITS_ARB, 0,
+            STENCIL_BITS_ARB, 1,
             0
         };
         var fAttributes = stackalloc float[0];

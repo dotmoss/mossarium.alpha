@@ -1,6 +1,7 @@
 ﻿using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
 using WindowsOS;
 using WindowsOS.Utils;
 using static OpenGL.Enums;
@@ -56,22 +57,22 @@ public unsafe class Window : SystemWindow
     {
         var vertexShaderSource = @"
 #version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec4 aColor;
-out vec4 ourColor;
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
+out vec3 ourColor;
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = vec4(aPos.x * 131072.0 / 480.0 - 1, 1 - aPos.y * 131072.0 / 240.0, 0.0, 1.0);
     ourColor = aColor;
 }"u8;
 
         var fragmentShaderSource = @"
 #version 330 core
-in vec4 ourColor;
+in vec3 ourColor;
 out vec4 FragColor;
 void main()
 {
-    FragColor = ourColor;
+    FragColor = vec4(ourColor, 1.0);
 }"u8;
                 
         vertexShader = GL.CreateShader(ShaderType.Vertex);
@@ -102,15 +103,16 @@ void main()
 
         // remove shaders
 
-        float[] vertices = {
-            // Positions          // Colors
-             0.4f,  0.6f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,  // top right: red
-             0.3f, -0.7f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,  // bottom right: green
-            -0.2f, -0.8f, 0.0f,   0.0f, 0.0f, 1.0f, 0.0f,  // bottom left: blue
-            -0.1f,  0.9f, 0.0f,   1.0f, 1.0f, 0.0f, 0.0f   // top left: yellow
+        var vertices = stackalloc Vertex[] 
+        {
+            new Vertex(10,  10,   255, 0, 0),
+            new Vertex(200, 10,   0, 255, 0),
+            new Vertex(200, 200,  0, 0, 255),
+            new Vertex(10, 200,   255, 255, 0)
         };
 
-        uint[] indices = {
+        var indices = stackalloc uint[] 
+        {
             0, 1, 3,
             1, 2, 3
         };
@@ -123,15 +125,15 @@ void main()
         GL.BindVertexArray(vao);
 
         GL.BindBuffer(BufferType.Array, vbo);
-        GL.BufferData(BufferType.Array, vertices, BufferUsage.StaticDraw);
+        GL.BufferData(BufferType.Array, sizeof(Vertex) * 4, vertices, BufferUsage.StaticDraw);
 
         GL.BindBuffer(BufferType.ElementArray, ebo);
-        GL.BufferData(BufferType.ElementArray, indices, BufferUsage.StaticDraw);
+        GL.BufferData(BufferType.ElementArray, sizeof(uint) * 6, indices, BufferUsage.StaticDraw);
         
-        GL.VertexAttribPointer(0, 3, DataType.Float, false, 7 * sizeof(float), null);
+        GL.VertexAttribPointer(0, 2, DataType.UShort, true, sizeof(Vertex), (void*)Vertex.CoordsOffset);
         GL.EnableVertexAttribArray(0);
 
-        GL.VertexAttribPointer(1, 4, DataType.Float, false, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+        GL.VertexAttribPointer(1, 3, DataType.UByte, true, sizeof(Vertex), (void*)Vertex.ColorsOffset);
         GL.EnableVertexAttribArray(1);
 
         GL.BindBuffer(BufferType.Array, 0);
@@ -139,6 +141,24 @@ void main()
         GL.BindVertexArray(0);
 
         (VBO, VAO, EBO) = (vbo, vao, ebo);
+    }
+
+    struct Vertex
+    {
+        public const int CoordsOffset = 0;
+        public const int ColorsOffset = sizeof(ushort) + sizeof(ushort);
+
+        public Vertex(ushort x, ushort y, byte red, byte green, byte blue)
+        {
+            X = x;
+            Y = y;
+            Red = red;
+            Green = green;
+            Blue = blue;
+        }
+
+        public ushort X, Y;
+        public byte Red, Green, Blue;
     }
 
     protected virtual void OnInitialized() { }
@@ -157,7 +177,7 @@ void main()
     {
         GL.Enable(Cap.Blend);
         GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
-        GL.ClearColor(1f, 1f, 1f, 1f);
+        GL.ClearColor(0f, 0f, 0f, 0f);
 
         GL.Clear(ClearMask.Color);
 
@@ -187,6 +207,7 @@ void main()
             OnRender();
 
             var spentOnFrame = frameRateWatcher.Elapsed.TotalMilliseconds;
+
             var timeToSpend = frameRate.FrameDelay - spentOnFrame;
             if (timeToSpend > 0)
             {
