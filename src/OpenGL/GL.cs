@@ -4,8 +4,10 @@ using static OpenGL.Enums;
 
 namespace OpenGL;
 
-public unsafe static class GL
+public unsafe class GL
 {
+    protected GL() { }
+
     [DllImport(gl, EntryPoint = "glAccum"), SuppressGCTransition]
     public static extern void Accum(Op op, float value);
 
@@ -50,7 +52,7 @@ public unsafe static class GL
     public static extern void CallLists(int n, Enums.DataType type, nint lists);
 
     [DllImport(gl, EntryPoint = "glClear"), SuppressGCTransition]
-    public static extern void Clear(uint mask);
+    public static extern void Clear(ClearMask mask);
 
     [DllImport(gl, EntryPoint = "glClearAccum"), SuppressGCTransition]
     public static extern void ClearAccum(float red, float green, float blue, float alpha);

@@ -1,5 +1,4 @@
-﻿using Mossarium.Alpha.UI.Windowing;
-using OpenGL;
+﻿using OpenGL;
 using WindowsOS;
 using static WindowsOS.PixelFormatDescriptor;
 
@@ -48,7 +47,7 @@ public unsafe class WindowGLContext : IDisposable
             if (!GL.MakeCurrent(handleToDeviceContext, tempContext))
                 throw null!;
 
-            GLContext.Inititalize();
+            GLEX.InititalizeNewVersionFunctions();
 
             if (!GL.MakeCurrent(handleToDeviceContext, 0))
                 throw null!;
@@ -72,7 +71,7 @@ public unsafe class WindowGLContext : IDisposable
         var fAttributes = stackalloc float[0];
         int formats;
         uint numFormats;
-        if (!GLContext.ChoosePixelFormatARB(handleToDeviceContext, iAttributes, fAttributes, 1, &formats, &numFormats))
+        if (!GLEX.ChoosePixelFormatARB(handleToDeviceContext, iAttributes, fAttributes, 1, &formats, &numFormats))
             throw null!;
 
         var gl33Attributes = stackalloc int[]
@@ -82,7 +81,7 @@ public unsafe class WindowGLContext : IDisposable
             CONTEXT_PROFILE_MASK_ARB,  CONTEXT_CORE_PROFILE_BIT_ARB,
             0
         };
-        var context = GLContext.CreateContextAttribsARB(handleToDeviceContext, 0, gl33Attributes);
+        var context = GLEX.CreateContextAttribsARB(handleToDeviceContext, 0, gl33Attributes);
         if (context == 0)
             throw null!;
 

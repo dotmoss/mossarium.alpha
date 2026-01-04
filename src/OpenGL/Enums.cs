@@ -106,6 +106,13 @@ public static class Enums
         All = GL_ALL_ATTRIB_BITS
     }
 
+    public enum ClearMask
+    {
+        Color = GL_COLOR_BUFFER_BIT,
+        Depth = GL_DEPTH_BUFFER_BIT,
+        Stencil = GL_STENCIL_BUFFER_BIT
+    }
+
     public enum LightOrdinal
     {
         Light0 = GL_LIGHT0,
@@ -1684,5 +1691,37 @@ public static class Enums
         TessEvaluation = GL_TESS_EVALUATION_SHADER,
         Geomenty = GL_GEOMETRY_SHADER,
         Fragment = GL_FRAGMENT_SHADER
+    }
+
+    const int GL_SHADER_TYPE = 0x8B4F;
+    const int GL_DELETE_STATUS = 0x8B80;
+    const int GL_COMPILE_STATUS = 0x8B81;
+    const int GL_INFO_LOG_LENGTH = 0x8B84;
+    const int GL_SHADER_SOURCE_LENGTH = 0x8B88;
+    public enum ShaderStatusName
+    {
+        ShaderType = GL_SHADER_TYPE,
+        DeleteStatus = GL_DELETE_STATUS,
+        CompileStatus = GL_COMPILE_STATUS,
+        InfoLogLength = GL_INFO_LOG_LENGTH,
+        ShaderSourceLength = GL_SHADER_SOURCE_LENGTH
+    }
+
+    const int GL_LINK_STATUS = 0x8B82;
+    const int GL_VALIDATE_STATUS = 0x8B83;
+    const int GL_ATTACHED_SHADERS = 0x8B85;
+    const int GL_ACTIVE_ATTRIBUTES = 0x8B89;
+    const int GL_ACTIVE_ATTRIBUTE_MAX_LENGTH = 0x8B8A;
+    const int GL_ACTIVE_UNIFORMS = 0x8B86;
+    const int GL_ACTIVE_UNIFORM_MAX_LENGTH = 0x8B87;
+    public enum ProgramStatusName
+    {
+        LinkStatus = GL_LINK_STATUS,
+        ValidateStasus = GL_VALIDATE_STATUS,
+        AttachedShaders = GL_ATTACHED_SHADERS,
+        AcriveAttributes = GL_ACTIVE_ATTRIBUTES,
+        ActiveAttributeMaxLength = GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
+        ActiveUniforms = GL_ACTIVE_UNIFORMS,
+        ActiveUniformMaxLength = GL_ACTIVE_UNIFORM_MAX_LENGTH
     }
 }
