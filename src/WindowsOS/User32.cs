@@ -70,6 +70,9 @@ public unsafe static class User32
 
     [DllImport(user), SuppressGCTransition] public static extern 
         int GetSystemMetrics(int nIndex);
+
+    [DllImport(user), SuppressGCTransition] public static extern 
+        int SetLayeredWindowAttributes(nint hwnd, int colorRef, byte alpha, int flags);
     #endregion
 
     public static int MessageBox(nint handle, string text, string caption, uint type)

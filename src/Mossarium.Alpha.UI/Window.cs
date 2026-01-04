@@ -20,7 +20,6 @@ public unsafe class Window : SystemWindow
         : base(title, location, size)
     {
         SetWindowAttributes(attributes);
-
     }
 
     FrameRate frameRate = DefaultFrameRate;
@@ -58,17 +57,21 @@ public unsafe class Window : SystemWindow
         var vertexShaderSource = @"
 #version 330 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec4 aColor;
+out vec4 ourColor;
 void main()
 {
-   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = vec4(aPos, 1.0);
+    ourColor = aColor;
 }"u8;
 
         var fragmentShaderSource = @"
 #version 330 core
+in vec4 ourColor;
 out vec4 FragColor;
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = ourColor;
 }"u8;
                 
         vertexShader = GL.CreateShader(ShaderType.Vertex);
@@ -100,10 +103,11 @@ void main()
         // remove shaders
 
         float[] vertices = {
-             0.5f,  0.4f, 0.0f,
-             0.5f, -0.7f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            -0.6f,  0.5f, 0.0f
+            // Positions          // Colors
+             0.4f,  0.6f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,  // top right: red
+             0.3f, -0.7f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,  // bottom right: green
+            -0.2f, -0.8f, 0.0f,   0.0f, 0.0f, 1.0f, 0.0f,  // bottom left: blue
+            -0.1f,  0.9f, 0.0f,   1.0f, 1.0f, 0.0f, 0.0f   // top left: yellow
         };
 
         uint[] indices = {
@@ -123,9 +127,12 @@ void main()
 
         GL.BindBuffer(BufferType.ElementArray, ebo);
         GL.BufferData(BufferType.ElementArray, indices, BufferUsage.StaticDraw);
-
-        GL.VertexAttribPointer(0, 3, DataType.Float, false, 3 * sizeof(float), null);
+        
+        GL.VertexAttribPointer(0, 3, DataType.Float, false, 7 * sizeof(float), null);
         GL.EnableVertexAttribArray(0);
+
+        GL.VertexAttribPointer(1, 4, DataType.Float, false, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+        GL.EnableVertexAttribArray(1);
 
         GL.BindBuffer(BufferType.Array, 0);
 
@@ -148,7 +155,9 @@ void main()
 
     protected virtual void OnRender()
     {
-        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        GL.Enable(Cap.Blend);
+        GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
+        GL.ClearColor(1f, 1f, 1f, 1f);
 
         GL.Clear(ClearMask.Color);
 
