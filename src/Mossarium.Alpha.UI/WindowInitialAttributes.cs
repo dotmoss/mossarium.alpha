@@ -1,11 +1,11 @@
 ﻿namespace Mossarium.Alpha.UI;
 
-public enum WindowAttributes
+public enum WindowInitialAttributes
 {
     None,
     Maximaze,
     HasCaption,
     HasMinimizeButton,
     HasMaximizeButton,
-    HasCloseButton
+    HasCloseButton,
 }

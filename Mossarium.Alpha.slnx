@@ -5,6 +5,7 @@
   <Folder Name="/Solution Items/">
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
+	<File Path=".editorconfig" />
   </Folder>
   <Project Path="src/Mossarium.Alpha.UI.Windowing/Mossarium.Alpha.UI.Windowing.csproj" Id="a67ab414-2b35-4d83-b674-055a4468551c">
     <Platform Project="x64" />

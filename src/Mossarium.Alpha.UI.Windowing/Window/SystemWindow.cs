@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Mossarium.Alpha.UI.Windowing.Structures;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using WindowsOS;
@@ -7,7 +8,7 @@ namespace Mossarium.Alpha.UI.Windowing;
 
 public unsafe partial class SystemWindow : IDisposable
 {
-    public SystemWindow(string title, (int X, int Y) location, (int Width, int Height) size)
+    public SystemWindow(string title, LocationI4 location, SizeI4 size)
     {
         internalWindow = SystemWindowInternal.Create(title, location, size);
         UpdateProperties();
@@ -15,64 +16,50 @@ public unsafe partial class SystemWindow : IDisposable
 
     protected bool isRunning;
     readonly SystemWindowInternal internalWindow;
-    (int X, int Y, int Width, int Height) cachedRectangle;
+    RectangleI4 cachedRectangle;
 
     public string Title { get => internalWindow.Title; set => internalWindow.Title = value; }
 
-    public (int X, int Y, int Width, int Height) Rectangle
+    public RectangleI4 Rectangle
     { 
         get => cachedRectangle; 
         set => internalWindow.Rectangle = value;
     }
 
-    public (int X, int Y) Location 
-    { 
-        get
-        {
-            var rectangle = cachedRectangle;
-            return (rectangle.X, rectangle.Y);
-        }
-        set
-        {
-            var rectangle = cachedRectangle;
-            cachedRectangle = (value.X, value.Y, rectangle.Width, rectangle.Height);
-            internalWindow.Location = value;
-        }
+    public LocationI4 Location 
+    {
+        get => cachedRectangle.Location;
+        set => internalWindow.Location = cachedRectangle.Location = value;
     }
 
-    public (int Width, int Height) Size
-    { 
-        get
-        {
-            var rectangle = cachedRectangle;
-            return (rectangle.Width, rectangle.Height);
-        }
-        set
-        {
-            var rectangle = cachedRectangle;
-            cachedRectangle = (rectangle.X, rectangle.Y, value.Width, value.Height);
-            internalWindow.Size = value;
-        }
+    public SizeI4 Size
+    {
+        get => cachedRectangle.Size;
+        set => internalWindow.Size = cachedRectangle.Size = value;
+    }
+
+    public int X
+    {
+        get => cachedRectangle.X;
+        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { X = value };
+    }
+
+    public int Y
+    {
+        get => cachedRectangle.Y;
+        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Y = value };
     }
 
     public int Width 
     {
         get => cachedRectangle.Width;
-        set
-        {
-            var rectangle = cachedRectangle;
-            internalWindow.Rectangle = cachedRectangle = (rectangle.X, rectangle.Y, value, rectangle.Height);
-        }
+        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Width = value };
     }
 
     public int Height
     {
         get => cachedRectangle.Height;
-        set
-        {
-            var rectangle = cachedRectangle;
-            internalWindow.Rectangle = cachedRectangle = (rectangle.X, rectangle.Y, rectangle.Width, value);
-        }
+        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Height = value };
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]

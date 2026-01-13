@@ -47,7 +47,7 @@ public unsafe class WindowGLContext : IDisposable
             if (!GL.MakeCurrent(handleToDeviceContext, tempContext))
                 throw null!;
 
-            GLEX.InititalizeNewVersionFunctions();
+            GLEX.InititalizeContextFunctions();
 
             if (!GL.MakeCurrent(handleToDeviceContext, 0))
                 throw null!;
@@ -76,8 +76,8 @@ public unsafe class WindowGLContext : IDisposable
 
         var gl33Attributes = stackalloc int[]
         {
-            CONTEXT_MAJOR_VERSION_ARB, 3,
-            CONTEXT_MINOR_VERSION_ARB, 3,
+            CONTEXT_MAJOR_VERSION_ARB, 4,
+            CONTEXT_MINOR_VERSION_ARB, 2,
             CONTEXT_PROFILE_MASK_ARB,  CONTEXT_CORE_PROFILE_BIT_ARB,
             0
         };

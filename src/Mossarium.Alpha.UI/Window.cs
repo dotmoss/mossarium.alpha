@@ -1,7 +1,7 @@
 ﻿using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing;
+using Mossarium.Alpha.UI.Windowing.Structures;
 using System.Diagnostics;
-using System.Runtime.Intrinsics.X86;
 using WindowsOS;
 using WindowsOS.Utils;
 using static OpenGL.Enums;
@@ -11,36 +11,37 @@ namespace Mossarium.Alpha.UI;
 
 public unsafe class Window : SystemWindow
 {
+    public static Rgb TransparentColor = (56, 30, 12);
     const int DefaultFramesPerSecond = 30;
     const int SecondsBeforeRest = 20;
     const int FramesBeforeRest = SecondsBeforeRest * DefaultFramesPerSecond;
-    static readonly FrameRate DefaultFrameRate = new FrameRate(DefaultFramesPerSecond);
-    static readonly FrameRate InRestFrameRate = new FrameRate(5);
+    static readonly FrameRateInfo DefaultFrameRateInfo = new FrameRateInfo(DefaultFramesPerSecond);
+    static readonly FrameRateInfo InRestFrameRateInfo = new FrameRateInfo(5);
 
-    public Window(string title, (int X, int Y) location, (int Width, int Height) size, WindowAttributes attributes = WindowAttributes.None)
+    public Window(string title, LocationI4 location, SizeI4 size, WindowInitialAttributes attributes = WindowInitialAttributes.None)
         : base(title, location, size)
     {
         SetWindowAttributes(attributes);
     }
 
-    FrameRate frameRate = DefaultFrameRate;
+    FrameRateInfo frameRateInfo = DefaultFrameRateInfo;
     int framesBeforeRest;
 
-    void SetWindowAttributes(WindowAttributes attributes)
+    void SetWindowAttributes(WindowInitialAttributes attributes)
     {
         var styles = WindowStyles.Overlapped;
-        if ((attributes & WindowAttributes.HasCaption) > 0)
+        if ((attributes & WindowInitialAttributes.HasCaption) > 0)
         {
             styles = WindowStyles.Caption | WindowStyles.SizeFrame;
-            if ((attributes & WindowAttributes.HasMinimizeButton) > 0)
+            if ((attributes & WindowInitialAttributes.HasMinimizeButton) > 0)
                 styles |= WindowStyles.MinimizeBox;
-            if ((attributes & WindowAttributes.HasMaximizeButton) > 0)
+            if ((attributes & WindowInitialAttributes.HasMaximizeButton) > 0)
                 styles |= WindowStyles.MaximizeBox;
-            if ((attributes & WindowAttributes.HasCloseButton) > 0)
+            if ((attributes & WindowInitialAttributes.HasCloseButton) > 0)
                 styles |= WindowStyles.SystemMenu;
         }
 
-        if ((attributes & WindowAttributes.Maximaze) > 0)
+        if ((attributes & WindowInitialAttributes.Maximaze) > 0)
             styles |= WindowStyles.Maximize;
 
         Style = styles;
@@ -51,23 +52,40 @@ public unsafe class Window : SystemWindow
         Visible = true;
     }
 
+    protected void EnableLayering()
+    {
+        const int LWA_COLORKEY = 1;
+
+        ExStyle |= WindowExStyles.Layered;
+        User32.SetLayeredWindowAttributes(Handle, TransparentColor.Win32Value, default, LWA_COLORKEY);
+    }
+
+    protected void DisableLayering()
+    {
+        ExStyle &= ~WindowExStyles.Layered;
+        User32.SetLayeredWindowAttributes(Handle, default, default, default);
+    }
+
     uint vertexShader, fragmentShader, shaderProgram;
-    uint VBO, VAO, EBO;
+    uint VBO, VAO, EBO, UBO;
     protected void OnGLInitialized()
     {
         var vertexShaderSource = @"
-#version 330 core
+#version 420 core
+layout (std140, binding = 0) uniform WindowData {
+    vec2 winSizeT;
+};
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec3 aColor;
 out vec3 ourColor;
 void main()
 {
-    gl_Position = vec4(aPos.x * 131072.0 / 480.0 - 1, 1 - aPos.y * 131072.0 / 240.0, 0.0, 1.0);
+    gl_Position = vec4(aPos.x * winSizeT.x - 1, aPos.y * winSizeT.y - 1, 0.0, 1.0);
     ourColor = aColor;
 }"u8;
 
         var fragmentShaderSource = @"
-#version 330 core
+#version 420 core
 in vec3 ourColor;
 out vec4 FragColor;
 void main()
@@ -83,7 +101,7 @@ void main()
         GL.GetShaderiv(vertexShader, ShaderStatusName.CompileStatus, &success);
         if (success == 0)
             throw null!;
-
+        
         fragmentShader = GL.CreateShader(ShaderType.Fragment);
         GL.ShaderSource(fragmentShader, fragmentShaderSource);
         GL.CompileShader(fragmentShader);
@@ -108,7 +126,7 @@ void main()
             new Vertex(10,  10,   255, 0, 0),
             new Vertex(200, 10,   0, 255, 0),
             new Vertex(200, 200,  0, 0, 255),
-            new Vertex(10, 200,   255, 255, 0)
+            new Vertex(10,  200,  255, 255, 0)
         };
 
         var indices = stackalloc uint[] 
@@ -117,30 +135,44 @@ void main()
             1, 2, 3
         };
 
-        uint vbo, vao, ebo;
+        uint vbo, vao, ebo, ubo;
         GL.GenerateVertexArrays(1, &vao);
         GL.GenerateBuffers(1, &vbo);
         GL.GenerateBuffers(1, &ebo);
+        GL.GenerateBuffers(1, &ubo);
 
         GL.BindVertexArray(vao);
+        {
+            GL.BindBuffer(BufferType.Array, vbo);
+            GL.BufferData(BufferType.Array, sizeof(Vertex) * 4, vertices, BufferUsage.StaticDraw);
 
-        GL.BindBuffer(BufferType.Array, vbo);
-        GL.BufferData(BufferType.Array, sizeof(Vertex) * 4, vertices, BufferUsage.StaticDraw);
+            GL.BindBuffer(BufferType.ElementArray, ebo);
+            GL.BufferData(BufferType.ElementArray, sizeof(uint) * 6, indices, BufferUsage.StaticDraw);
 
-        GL.BindBuffer(BufferType.ElementArray, ebo);
-        GL.BufferData(BufferType.ElementArray, sizeof(uint) * 6, indices, BufferUsage.StaticDraw);
-        
-        GL.VertexAttribPointer(0, 2, DataType.UShort, true, sizeof(Vertex), (void*)Vertex.CoordsOffset);
-        GL.EnableVertexAttribArray(0);
+            GL.VertexAttribPointer(0, 2, DataType.UShort, true, sizeof(Vertex), (void*)Vertex.CoordsOffset);
+            GL.EnableVertexAttribArray(0);
 
-        GL.VertexAttribPointer(1, 3, DataType.UByte, true, sizeof(Vertex), (void*)Vertex.ColorsOffset);
-        GL.EnableVertexAttribArray(1);
+            GL.VertexAttribPointer(1, 3, DataType.UByte, true, sizeof(Vertex), (void*)Vertex.ColorsOffset);
+            GL.EnableVertexAttribArray(1);
 
-        GL.BindBuffer(BufferType.Array, 0);
-
+            GL.BindBuffer(BufferType.Array, 0);
+        }
         GL.BindVertexArray(0);
 
-        (VBO, VAO, EBO) = (vbo, vao, ebo);
+
+        GL.BindBuffer(BufferType.Uniform, ubo);
+
+        var glslWindowData = new GlslWindowData
+        {
+            Size = ((ushort)Size.Width, (ushort)Size.Height)
+        };
+        GL.BufferData(BufferType.Uniform, 8, &glslWindowData, BufferUsage.DynamicDraw);
+
+        GL.BindBufferBase(BufferType.Uniform, 0, ubo);
+
+        GL.BindBuffer(BufferType.Uniform, 0);
+
+        (VBO, VAO, EBO, UBO) = (vbo, vao, ebo, ubo);
     }
 
     struct Vertex
@@ -202,13 +234,13 @@ void main()
 
             framesBeforeRest--;
             if (framesBeforeRest == 0)
-                frameRate = InRestFrameRate;
+                frameRateInfo = InRestFrameRateInfo;
 
             OnRender();
 
             var spentOnFrame = frameRateWatcher.Elapsed.TotalMilliseconds;
 
-            var timeToSpend = frameRate.FrameDelay - spentOnFrame;
+            var timeToSpend = frameRateInfo.FrameDelay - spentOnFrame;
             if (timeToSpend > 0)
             {
                 var nanoseconds = (long)(timeToSpend * 10000);
@@ -227,15 +259,15 @@ void main()
     protected override unsafe bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
         if (framesBeforeRest <= 0)
-            frameRate = DefaultFrameRate;
+            frameRateInfo = DefaultFrameRateInfo;
 
         framesBeforeRest = FramesBeforeRest;
         return base.OnMessage(hWnd, message, wParam, lParam);
     }
 
-    struct FrameRate
+    struct FrameRateInfo
     {
-        public FrameRate(int framesPerSecond)
+        public FrameRateInfo(int framesPerSecond)
         {
             FramesPerSecond = framesPerSecond;
             FrameDelay = 1000d / FramesPerSecond;

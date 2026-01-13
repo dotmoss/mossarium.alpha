@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Mossarium.Alpha.UI.Windowing.Structures;
+using System.Diagnostics;
 using WindowsOS;
 
 namespace Mossarium.Alpha.UI.Windowing;
@@ -20,34 +21,39 @@ unsafe partial class SystemWindow
         public string Title { get => User32.GetWindowTitle(Handle); set => User32.SetWindowTitle(Handle, value); }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public (int X, int Y, int Width, int Height) Rectangle
+        public Win32Rectangle Rectangle
         {
-            get => User32.GetWindowRectangle(Handle);
+            get
+            {
+                var rectangle = User32.GetWindowRectangle(Handle);
+                return new Win32Rectangle(rectangle.X, rectangle.Y, rectangle.X2, rectangle.Y2);
+            }
             set => User32.SetWindowRectangle(Handle, value.X, value.Y, value.Width, value.Height);
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public (int X, int Y) Location
+        public LocationI4 Location
         {
             get
             {
                 var rectangle = Rectangle;
-                return (rectangle.X, rectangle.Y);
+                return new LocationI4(rectangle.X, rectangle.Y);
             }
             set
             {
                 var rectangle = Rectangle;
-                User32.SetWindowRectangle(Handle, value.X, value.Y, value.X + rectangle.Width, value.Y + rectangle.Height);
+                var (width, height) = (rectangle.Width, rectangle.Height);
+                User32.SetWindowRectangle(Handle, value.X, value.Y, width, height);
             }
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public (int Width, int Height) Size
+        public SizeI4 Size
         {
             get
             {
                 var rectangle = Rectangle;
-                return (rectangle.Width, rectangle.Height);
+                return new SizeI4(rectangle.Width, rectangle.Height);
             }
             set
             {
@@ -78,8 +84,8 @@ unsafe partial class SystemWindow
 
         public static SystemWindowInternal Create(
             string title,
-            (int X, int Y) location,
-            (int Width, int Height) size)
+            LocationI4 location,
+            SizeI4 size)
         {
             var handle = User32.CreateWindow(0, 32770, title, 0, location.X, location.Y, size.Width, size.Height, 0, 0, 0/*instance*/, 0);
             var window = FromHandle(handle);

@@ -185,7 +185,7 @@ public unsafe static class User32
     public static void SetWindowPos(nint handle, int x, int y, int width, int height)
         => SetWindowPos(handle, x, y, width, height, SetWindowPosFlags.NoZOrder);
 
-    public static (int X, int Y, int Width, int Height) GetWindowRectangle(nint handle)
+    public static (int X, int Y, int X2, int Y2) GetWindowRectangle(nint handle)
     {
         (int, int, int, int) rectangle;
         GetWindowRect(handle, (int*)&rectangle);

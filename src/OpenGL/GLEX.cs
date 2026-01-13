@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using static OpenGL.Enums;
+﻿using static OpenGL.Enums;
 
 namespace OpenGL;
 
@@ -7,7 +6,7 @@ public unsafe class GLEX : GL
 {
     GLEX() : base() { }
 
-    public static void InititalizeNewVersionFunctions()
+    public static void InititalizeContextFunctions()
     {
         wglCreateContextAttribsARB = (delegate* unmanaged[SuppressGCTransition]<nint, nint, int*, nint>)GetProcAddress("wglCreateContextAttribsARB"u8);
         wglChoosePixelFormatARB = (delegate* unmanaged[SuppressGCTransition]<nint, int*, float*, uint, int*, uint*, bool>)GetProcAddress("wglChoosePixelFormatARB"u8);
@@ -27,6 +26,7 @@ public unsafe class GLEX : GL
         glLinkProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glLinkProgram"u8);
         glGetShaderiv = (delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void>)GetProcAddress("glGetShaderiv"u8);
         glGetProgramiv = (delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void>)GetProcAddress("glGetProgramiv"u8);
+        glBindBufferBase = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void>)GetProcAddress("glBindBufferBase"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {
@@ -59,6 +59,7 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glLinkProgram;
     static delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void> glGetShaderiv;
     static delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void> glGetProgramiv;
+    static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void> glBindBufferBase;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -121,4 +122,7 @@ public unsafe class GLEX : GL
 
     public static void GetProgramiv(uint shader, ProgramStatusName name, int* parameters)
         => glGetProgramiv(shader, name, parameters);
+
+    public static void BindBufferBase(BufferType target, uint baseIndex, uint bufferIndex)
+        => glBindBufferBase(target, baseIndex, bufferIndex);
 }
