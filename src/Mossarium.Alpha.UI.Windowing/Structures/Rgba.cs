@@ -8,7 +8,7 @@ public struct Rgba
 
     public Rgba(int r, int g, int b) : this((byte)r, (byte)g, (byte)b) { }
 
-    public Rgba(byte r, byte g, byte b) => (R, G, B) = (r, g, b);
+    public Rgba(byte r, byte g, byte b) => (R, G, B, A) = (r, g, b, byte.MaxValue);
 
     public byte R, G, B, A;
 

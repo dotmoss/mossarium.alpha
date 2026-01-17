@@ -1,5 +1,5 @@
-﻿using Mossarium.Alpha.UI;
-using Mossarium.Alpha.UI.Windowing.Structures;
+﻿using Mossarium.Alpha.UI.Windowing.Structures;
+using Mossarium.Alpha.UI.Windows;
 using WindowsOS;
 
 namespace Mossarium.Alpha.Windows;
@@ -10,11 +10,12 @@ public class ApplicationWindow : Window
 
     public ApplicationWindow() : 
         base(
-            title: "Mossarium (alpha)", 
-            location: GetLocationForScreenCenter(), 
+            title: "Mossarium (alpha)",
+            location: GetLocationForScreenCenter(),
             size: WindowSize
         )
     {
+        Layered = true;
         InitializeWindow();
     }
 

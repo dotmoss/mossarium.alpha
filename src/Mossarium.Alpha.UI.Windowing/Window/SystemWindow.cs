@@ -8,6 +8,8 @@ namespace Mossarium.Alpha.UI.Windowing;
 
 public unsafe partial class SystemWindow : IDisposable
 {
+    public static Rgb TransparentColor = (56, 30, 12);
+
     public SystemWindow(string title, LocationI4 location, SizeI4 size)
     {
         internalWindow = SystemWindowInternal.Create(title, location, size);
@@ -74,6 +76,25 @@ public unsafe partial class SystemWindow : IDisposable
         set => Style = value ? Style | WindowStyles.Visible : Style & ~WindowStyles.Visible;
     }
 
+    public bool Layered
+    {
+        set
+        {
+            if (value)
+            {
+                const int LWA_COLORKEY = 1;
+
+                ExStyle |= WindowExStyles.Layered;
+                User32.SetLayeredWindowAttributes(Handle, TransparentColor.Win32Value, default, LWA_COLORKEY);
+            }
+            else
+            {
+                ExStyle &= ~WindowExStyles.Layered;
+                User32.SetLayeredWindowAttributes(Handle, default, default, default);
+            }
+        }
+    }
+
     public nint Handle => internalWindow.Handle;
 
     public nint HandleToDeviceContext => internalWindow.HDC;
@@ -128,6 +149,19 @@ public unsafe partial class SystemWindow : IDisposable
 
                     break;
                 }
+            case WindowMessage.Size:
+                {
+                    const ulong SIZE_MAXHIDE = 4;
+                    const ulong SIZE_MAXSHOW = 4;
+
+                    if (wParam is not SIZE_MAXHIDE and not SIZE_MAXSHOW)
+                    {
+                        var size = Message.DecodeSize(lParam);
+                        OnSizeChanged(new SizeI4(size.X, size.Y));
+                    }
+
+                    break;
+                }
         }
 
         return true;
@@ -148,6 +182,8 @@ public unsafe partial class SystemWindow : IDisposable
             PressedKeyCollection.Insance.Clear();
         }
     }
+
+    protected virtual void OnSizeChanged(SizeI4 size) { }
 
     protected virtual bool OnClose() 
     {

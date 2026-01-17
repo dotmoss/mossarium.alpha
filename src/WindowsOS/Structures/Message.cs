@@ -10,6 +10,20 @@ public struct Message
     public long Point;
     public int Private;
 
+    public static Size DecodeSize(ulong lParam) => new Size(lParam);
+
+    public struct Size
+    {
+        public Size(ulong lParam)
+        {
+            X = (int)(lParam & 0xFFFF);
+            X = (int)(lParam >> 16);
+        }
+
+        public int X; 
+        public int Y;
+    }
+
     public static DownKey DecodeDownKey(ulong wParam, ulong lParam) => new DownKey(wParam, lParam);
 
     public struct DownKey

@@ -1,4 +1,6 @@
-﻿namespace Mossarium.Alpha.UI.Windowing.Structures;
+﻿using System.Runtime.InteropServices;
+
+namespace Mossarium.Alpha.UI.Windowing.Structures;
 
 public struct LocationI4
 {

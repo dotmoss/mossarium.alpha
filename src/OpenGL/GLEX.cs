@@ -18,6 +18,7 @@ public unsafe class GLEX : GL
         glBindVertexArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glBindVertexArray"u8);
         glBindBuffer = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, void>)GetProcAddress("glBindBuffer"u8);
         glBufferData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void>)GetProcAddress("glBufferData"u8);
+        glBufferSubData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void>)GetProcAddress("glBufferSubData"u8);
         glVertexAttribPointer = (delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, bool, int, void*, void>)GetProcAddress("glVertexAttribPointer"u8);
         glEnableVertexAttribArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glEnableVertexAttribArray"u8);
         glUseProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glUseProgram"u8);
@@ -27,6 +28,7 @@ public unsafe class GLEX : GL
         glGetShaderiv = (delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void>)GetProcAddress("glGetShaderiv"u8);
         glGetProgramiv = (delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void>)GetProcAddress("glGetProgramiv"u8);
         glBindBufferBase = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void>)GetProcAddress("glBindBufferBase"u8);
+        glDeleteShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteShader"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {
@@ -51,6 +53,7 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glBindVertexArray;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, void> glBindBuffer;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void> glBufferData;
+    static delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void> glBufferSubData;
     static delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, bool, int, void*, void> glVertexAttribPointer;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glEnableVertexAttribArray;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glUseProgram;
@@ -60,6 +63,7 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void> glGetShaderiv;
     static delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void> glGetProgramiv;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void> glBindBufferBase;
+    static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteShader;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -99,6 +103,9 @@ public unsafe class GLEX : GL
             glBufferData(targetType, array.Length * sizeof(T), pointer, usage);
     }
 
+    public static void BufferSubData(BufferType targetType, int offset, int size, void* data)
+        => glBufferSubData(targetType, offset, size, data);
+
     public static void VertexAttribPointer(uint index, int size, DataType type, bool normalized, int stride, void* pointer)
         => glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 
@@ -125,4 +132,7 @@ public unsafe class GLEX : GL
 
     public static void BindBufferBase(BufferType target, uint baseIndex, uint bufferIndex)
         => glBindBufferBase(target, baseIndex, bufferIndex);
+
+    public static void DeleteShader(uint shader)
+        => glDeleteShader(shader);
 }

@@ -1,8 +1,10 @@
-﻿namespace Mossarium.Alpha.UI.OpenGL;
+﻿using Mossarium.Alpha.UI.Windowing.Structures;
+
+namespace Mossarium.Alpha.UI.OpenGL;
 
 public struct GlslWindowData
 {
-    private (float X, float Y) sizeTransformer;
+    private SizeF4 sizeTransformer;
 
-    public (ushort Width, ushort Height) Size { set => sizeTransformer = (131072f / value.Width, 131072f / value.Height); }
+    public SizeU2 Size { set => sizeTransformer = new SizeF4(131072f / value.Width, 131072f / value.Height); }
 }
