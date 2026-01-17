@@ -314,7 +314,7 @@ public static class Enums
     const int GL_STACK_OVERFLOW = 1283;
     const int GL_STACK_UNDERFLOW = 1284;
     const int GL_OUT_OF_MEMORY = 1285;
-    public enum Error
+    public enum Status
     {
         NoError = GL_NO_ERROR,
         InvalidEnum = GL_INVALID_ENUM,
@@ -1717,7 +1717,7 @@ public static class Enums
     public enum ProgramStatusName
     {
         LinkStatus = GL_LINK_STATUS,
-        ValidateStasus = GL_VALIDATE_STATUS,
+        ValidateStatus = GL_VALIDATE_STATUS,
         AttachedShaders = GL_ATTACHED_SHADERS,
         AcriveAttributes = GL_ACTIVE_ATTRIBUTES,
         ActiveAttributeMaxLength = GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,

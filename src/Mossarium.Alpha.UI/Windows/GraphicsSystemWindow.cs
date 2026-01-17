@@ -44,6 +44,8 @@ public unsafe class GraphicsSystemWindow : SystemWindow
         Style = styles;
     }
 
+    protected virtual void OnWindowInitialized() { }
+
     protected virtual void OnInitializeRender() { }
 
     protected override void OnMessageLoopStarted()
@@ -74,6 +76,7 @@ public unsafe class GraphicsSystemWindow : SystemWindow
         using var glContext = new WindowGLContext(HandleToDeviceContext);
 
         OnInitializeRender();
+        OnWindowInitialized();
 
         while (isRunning)
         {

@@ -7,6 +7,10 @@
     <File Path="README.md" />
 	<File Path=".editorconfig" />
   </Folder>
+  <Project Path="src/Mossarium.Alpha.UI.OpenGL/Mossarium.Alpha.UI.OpenGL.csproj" Id="ce8a234b-2c13-4802-ad3e-a12356014682">
+    <Platform Project="x64" />
+    <Build Solution="Release|*" Project="false" />
+  </Project>
   <Project Path="src/Mossarium.Alpha.UI.Windowing/Mossarium.Alpha.UI.Windowing.csproj" Id="a67ab414-2b35-4d83-b674-055a4468551c">
     <Platform Project="x64" />
   </Project>

@@ -237,7 +237,7 @@ public unsafe partial class SystemWindow : IDisposable
         OnMessageLoopStarted();
 
         User32.SetWindowWndProcFunction(Handle, (nint)(delegate* unmanaged<nint, WindowMessage, ulong, ulong, long>)&WndProc);
-        
+
         Message message;
         while (isRunning)
         {

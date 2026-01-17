@@ -16,7 +16,6 @@ public class ApplicationWindow : Window
         )
     {
         Layered = true;
-        InitializeWindow();
     }
 
     static LocationI4 GetLocationForScreenCenter()

@@ -515,7 +515,7 @@ public unsafe class GL
     }
 
     [DllImport(gl, EntryPoint = "glGetError"), SuppressGCTransition]
-    public static extern Error GetError();
+    public static extern Status GetError();
 
     [DllImport(gl, EntryPoint = "glGetFloatv"), SuppressGCTransition]
     public static extern void GetFloat(PName pname, float* @params);

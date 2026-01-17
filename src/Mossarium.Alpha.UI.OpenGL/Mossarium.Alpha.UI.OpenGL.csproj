@@ -4,20 +4,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mossarium.Alpha.UI.OpenGL\Mossarium.Alpha.UI.OpenGL.csproj" />
     <ProjectReference Include="..\Mossarium.Alpha.UI.Windowing\Mossarium.Alpha.UI.Windowing.csproj" />
     <ProjectReference Include="..\OpenGL\OpenGL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="ModuleAttributes.cs">
-      <Visible>false</Visible>
-    </Compile>
   </ItemGroup>
 
 </Project>

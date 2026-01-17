@@ -2,12 +2,12 @@
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-struct Vertex
+public struct GlVertex
 {
     public const int CoordsOffset = 0;
     public const int ColorsOffset = sizeof(ushort) + sizeof(ushort);
 
-    public Vertex(LocationU2 location, Rgba color)
+    public GlVertex(LocationU2 location, Rgba color)
     {
         Location = location;
         Color = color;

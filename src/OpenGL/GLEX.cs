@@ -29,6 +29,7 @@ public unsafe class GLEX : GL
         glGetProgramiv = (delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void>)GetProcAddress("glGetProgramiv"u8);
         glBindBufferBase = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void>)GetProcAddress("glBindBufferBase"u8);
         glDeleteShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteShader"u8);
+        glDeleteProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteProgram"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {
@@ -64,6 +65,7 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void> glGetProgramiv;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void> glBindBufferBase;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteShader;
+    static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteProgram;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -103,6 +105,18 @@ public unsafe class GLEX : GL
             glBufferData(targetType, array.Length * sizeof(T), pointer, usage);
     }
 
+    public static void BufferData<T>(BufferType targetType, T data, BufferUsage usage)
+        where T : unmanaged
+    {
+        glBufferData(targetType, sizeof(T), &data, usage);
+    }
+
+    public static void BufferData<T>(BufferType targetType, T* data, BufferUsage usage)
+        where T : unmanaged
+    {
+        glBufferData(targetType, sizeof(T), data, usage);
+    }
+
     public static void BufferSubData(BufferType targetType, int offset, int size, void* data)
         => glBufferSubData(targetType, offset, size, data);
 
@@ -127,12 +141,21 @@ public unsafe class GLEX : GL
     public static void GetShaderiv(uint shader, ShaderStatusName name, int* parameters)
         => glGetShaderiv(shader, name, parameters);
 
-    public static void GetProgramiv(uint shader, ProgramStatusName name, int* parameters)
-        => glGetProgramiv(shader, name, parameters);
+    public static void GetShaderCompilationStatus(uint shader, bool* isSuccess)
+        => glGetShaderiv(shader, ShaderStatusName.CompileStatus, (int*)isSuccess);
+
+    public static void GetProgramiv(uint program, ProgramStatusName name, int* parameters)
+        => glGetProgramiv(program, name, parameters);
+
+    public static void GetProgramLinkStatus(uint program, bool* isSuccess)
+        => glGetProgramiv(program, ProgramStatusName.LinkStatus, (int*)isSuccess);
 
     public static void BindBufferBase(BufferType target, uint baseIndex, uint bufferIndex)
         => glBindBufferBase(target, baseIndex, bufferIndex);
 
     public static void DeleteShader(uint shader)
         => glDeleteShader(shader);
+
+    public static void DeleteProgram(uint program)
+        => glDeleteProgram(program);
 }
