@@ -8,27 +8,42 @@ public static class GlslImpls
 {
     public static void Compile()
     {
-        Shader.Vertex.GradientRgbTriangles = new GlslShader(ShaderType.Vertex, 
-@"#version 420 core
-layout (std140, binding = 0) uniform WindowData {
+        Shader.Vertex.GradientRgbTriangles = new GlslShader(ShaderType.Vertex,
+@"#version 430 core
+
+layout (std140, binding = 0) uniform WindowData 
+{
+    vec2 winSize;
     vec2 winSizeT;
 };
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec3 aColor;
-out vec3 ourColor;
+
+layout (location = 0) in vec2 inPos;
+layout (location = 1) in vec3 inColor;
+
+out vec3 fragColor;
+
 void main()
 {
-    gl_Position = vec4(aPos.x * winSizeT.x - 1, aPos.y * winSizeT.y - 1, 0.0, 1.0);
-    ourColor = aColor;
+    gl_Position = vec4(
+        inPos.x * winSizeT.x - 1.0, 
+        inPos.y * winSizeT.y - 1.0,
+        0.0, 
+        1.0
+    );
+
+    fragColor = inColor;
 }"u8);
 
         Shader.Fragment.RgbToRgba = new GlslShader(ShaderType.Fragment,
-@"#version 420 core
-in vec3 ourColor;
+@"#version 430 core
+
+in vec3 fragColor;
+
 out vec4 FragColor;
+
 void main()
 {
-    FragColor = vec4(ourColor, 1.0);
+    FragColor = vec4(fragColor, 1.0);
 }"u8);
 
         Program.GradientRgbTriangles = new GlslProgram([

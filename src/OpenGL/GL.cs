@@ -338,7 +338,7 @@ public unsafe class GL
     public static extern void DrawBuffer(Mode mode);
 
     [DllImport(gl, EntryPoint = "glDrawElements"), SuppressGCTransition]
-    public static extern void DrawElements(Mode mode, int count, BUType type, nint indices);
+    public static extern void DrawElements(Mode mode, int count, BUType type, nint offset);
 
     [DllImport(gl, EntryPoint = "glDrawPixels"), SuppressGCTransition]
     public static extern void DrawPixels(int width, int height, ImageFormat format, BType type, nint pixels);

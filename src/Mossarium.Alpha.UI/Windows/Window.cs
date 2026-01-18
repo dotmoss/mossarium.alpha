@@ -24,65 +24,55 @@ public unsafe class Window : GraphicsSystemWindow
         {
             Size = ((ushort)Size.Width, (ushort)Size.Height)
         };
-        GL.BufferSubData(BufferType.Uniform, 0, 8, &glslWindowData);
+
+        UniformBuffer.Write(glslWindowData);
     }
 
-    uint VBO, VAO, EBO, UBO;
+    GlBuffer VertexBuffer, ElementsBuffer, UniformBuffer;
+    GlVertexArray<GlVertex, ushort> VertexArray;
     protected override void OnInitializeRender()
     {
         GlslImpls.Compile();
 
-        var vertices = stackalloc GlVertex[] 
-        {
+        ReadOnlySpan<GlVertex> vertices = 
+        [
             new GlVertex((10,  10),   (255, 0, 0)),
             new GlVertex((200, 10),   (0, 255, 0)),
             new GlVertex((200, 200),  (0, 0, 255)),
             new GlVertex((10,  200),  (255, 255, 0))
-        };
+        ];
 
-        var indices = stackalloc uint[]
-        {
+        ReadOnlySpan<ushort> indices =
+        [
             0, 1, 3,
             1, 2, 3
-        };
+        ];
 
-        uint vbo, vao, ebo, ubo;
-        GL.GenerateVertexArrays(1, &vao);
-        GL.GenerateBuffers(1, &vbo);
-        GL.GenerateBuffers(1, &ebo);
-        GL.GenerateBuffers(1, &ubo);
+        var vertexArray = GlVertexArray<GlVertex, ushort>.Create();
 
-        GL.BindVertexArray(vao);
-        {
-            GL.BindBuffer(BufferType.Array, vbo);
-            GL.BufferData(BufferType.Array, sizeof(GlVertex) * 4, vertices, BufferUsage.StaticDraw);
+        GlBuffer vertexBuffer, elementsBuffer, uniformBuffer;
+        GlBuffer.CreateMultiple(
+            &vertexBuffer, BufferType.Array, BufferUsage.DynamicDraw, 
+            &elementsBuffer, BufferType.ElementArray, BufferUsage.DynamicDraw,
+            &uniformBuffer, BufferType.Uniform, BufferUsage.DynamicDraw
+        );
 
-            GL.BindBuffer(BufferType.ElementArray, ebo);
-            GL.BufferData(BufferType.ElementArray, sizeof(uint) * 6, indices, BufferUsage.StaticDraw);
+        vertexArray.Bind();
+        vertexBuffer.Allocate(vertices);
+        elementsBuffer.Allocate(indices);
 
-            GL.VertexAttribPointer(0, 2, DataType.UShort, true, sizeof(GlVertex), (void*)GlVertex.CoordsOffset);
-            GL.EnableVertexAttribArray(0);
+        vertexArray.DescribeAttributes();
 
-            GL.VertexAttribPointer(1, 3, DataType.UByte, true, sizeof(GlVertex), (void*)GlVertex.ColorsOffset);
-            GL.EnableVertexAttribArray(1);
-
-            GL.BindBuffer(BufferType.Array, 0);
-        }
-        GL.BindVertexArray(0);
-
-
-        GL.BindBuffer(BufferType.Uniform, ubo);
-        GL.BindBufferBase(BufferType.Uniform, 0, ubo);
+        uniformBuffer.BindToUniformBase(0);
 
         var glslWindowData = new GlslWindowData
         {
             Size = ((ushort)Size.Width, (ushort)Size.Height)
         };
-        GL.BufferData(BufferType.Uniform, glslWindowData, BufferUsage.DynamicDraw);
+        uniformBuffer.Allocate(glslWindowData);
 
-        GL.BindBuffer(BufferType.Uniform, 0);
-
-        (VBO, VAO, EBO, UBO) = (vbo, vao, ebo, ubo);
+        (VertexBuffer, ElementsBuffer, UniformBuffer) = (vertexBuffer, elementsBuffer, uniformBuffer);
+        VertexArray = vertexArray;
     }
 
     protected override void OnSizeChanged(SizeI4 size)
@@ -99,9 +89,9 @@ public unsafe class Window : GraphicsSystemWindow
 
         GL.Clear(ClearMask.Color);
 
-        GL.UseProgram(GlslImpls.Program.GradientRgbTriangles.ID);
-        GL.BindVertexArray(VAO);
-        GL.DrawElements(Mode.Triangles, 6, BUType.UInt, 0);
+        GlslImpls.Program.GradientRgbTriangles.Use();
+        VertexArray.Bind();
+        VertexArray.DrawElements(Mode.Triangles, 0, 6);
 
         GL.SwapBuffers(HandleToDeviceContext);
     }

@@ -25,6 +25,11 @@ public unsafe struct GlslProgram : IDisposable
 
     public uint ID { get; private set; }
 
+    public void Use()
+    {
+        GL.UseProgram(ID);
+    }
+
     public void Dispose()
     {
         GL.DeleteProgram(ID);

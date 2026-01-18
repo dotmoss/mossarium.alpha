@@ -13,4 +13,10 @@
     <ProjectReference Include="..\OpenGL\OpenGL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<Compile Update="ModuleAttributes.cs">
+	  <Visible>false</Visible>
+	</Compile>
+  </ItemGroup>
+
 </Project>

@@ -33,7 +33,7 @@ public static class Enums
         LineLoop = GL_LINE_LOOP,
         LineStrip = GL_LINE_STRIP,
         Triangles = GL_TRIANGLES,
-        TriangleStript = GL_TRIANGLE_STRIP,
+        TriangleStrip = GL_TRIANGLE_STRIP,
         TriangleFan = GL_TRIANGLE_FAN,
         Quads = GL_QUADS,
         QuadStript = GL_QUAD_STRIP,
@@ -1623,21 +1623,21 @@ public static class Enums
     public const int TextureEnv = GL_TEXTURE_ENV;
     public const int Shininess = GL_SHININESS;
 
-    const int GL_ARRAY_BUFFER = 0x8892;
-    const int GL_ATOMIC_COUNTER_BUFFER = 0x92C0;
-    const int GL_COPY_READ_BUFFER = 0x8F36;
-    const int GL_COPY_WRITE_BUFFER = 0x8F37;
-    const int GL_DISPATCH_INDIRECT_BUFFER = 0x90EE;
-    const int GL_DRAW_INDIRECT_BUFFER = 0x8F3F;
-    const int GL_ELEMENT_ARRAY_BUFFER = 0x8893;
-    const int GL_PIXEL_PACK_BUFFER = 0x88EB;
-    const int GL_PIXEL_UNPACK_BUFFER = 0x88EC;
-    const int GL_QUERY_BUFFER = 0x9192;
-    const int GL_SHADER_STORAGE_BUFFER = 0x90D2;
-    const int GL_TEXTURE_BUFFER = 0x8C2A;
-    const int GL_TRANSFORM_FEEDBACK_BUFFER = 0x8C8E;
-    const int GL_UNIFORM_BUFFER = 0x8A11;
-    public enum BufferType
+    const ushort GL_ARRAY_BUFFER = 0x8892;
+    const ushort GL_ATOMIC_COUNTER_BUFFER = 0x92C0;
+    const ushort GL_COPY_READ_BUFFER = 0x8F36;
+    const ushort GL_COPY_WRITE_BUFFER = 0x8F37;
+    const ushort GL_DISPATCH_INDIRECT_BUFFER = 0x90EE;
+    const ushort GL_DRAW_INDIRECT_BUFFER = 0x8F3F;
+    const ushort GL_ELEMENT_ARRAY_BUFFER = 0x8893;
+    const ushort GL_PIXEL_PACK_BUFFER = 0x88EB;
+    const ushort GL_PIXEL_UNPACK_BUFFER = 0x88EC;
+    const ushort GL_QUERY_BUFFER = 0x9192;
+    const ushort GL_SHADER_STORAGE_BUFFER = 0x90D2;
+    const ushort GL_TEXTURE_BUFFER = 0x8C2A;
+    const ushort GL_TRANSFORM_FEEDBACK_BUFFER = 0x8C8E;
+    const ushort GL_UNIFORM_BUFFER = 0x8A11;
+    public enum BufferType : ushort
     {
         Array = GL_ARRAY_BUFFER,
         AtomicCounter = GL_ATOMIC_COUNTER_BUFFER,
@@ -1655,16 +1655,16 @@ public static class Enums
         Uniform = GL_UNIFORM_BUFFER,
     }
 
-    const int GL_STREAM_DRAW = 0x88E0;
-    const int GL_STREAM_READ = 0x88E1;
-    const int GL_STREAM_COPY = 0x88E2;
-    const int GL_STATIC_DRAW = 0x88E4;
-    const int GL_STATIC_READ = 0x88E5;
-    const int GL_STATIC_COPY = 0x88E6;
-    const int GL_DYNAMIC_DRAW = 0x88E8;
-    const int GL_DYNAMIC_READ = 0x88E9;
-    const int GL_DYNAMIC_COPY = 0x88EA;
-    public enum BufferUsage
+    const ushort GL_STREAM_DRAW = 0x88E0;
+    const ushort GL_STREAM_READ = 0x88E1;
+    const ushort GL_STREAM_COPY = 0x88E2;
+    const ushort GL_STATIC_DRAW = 0x88E4;
+    const ushort GL_STATIC_READ = 0x88E5;
+    const ushort GL_STATIC_COPY = 0x88E6;
+    const ushort GL_DYNAMIC_DRAW = 0x88E8;
+    const ushort GL_DYNAMIC_READ = 0x88E9;
+    const ushort GL_DYNAMIC_COPY = 0x88EA;
+    public enum BufferUsage : ushort
     {
         StreamDraw = GL_STREAM_DRAW,
         StreamRead = GL_STREAM_READ,

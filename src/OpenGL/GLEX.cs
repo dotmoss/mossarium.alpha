@@ -15,7 +15,9 @@ public unsafe class GLEX : GL
         glCompileShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glCompileShader"u8);
         glGenVertexArrays = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glGenVertexArrays"u8);
         glGenBuffers = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glGenBuffers"u8);
+        glDeleteBuffers = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glDeleteBuffers"u8);
         glBindVertexArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glBindVertexArray"u8);
+        glDeleteVertexArray = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glDeleteVertexArrays"u8);
         glBindBuffer = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, void>)GetProcAddress("glBindBuffer"u8);
         glBufferData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void>)GetProcAddress("glBufferData"u8);
         glBufferSubData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void>)GetProcAddress("glBufferSubData"u8);
@@ -30,6 +32,9 @@ public unsafe class GLEX : GL
         glBindBufferBase = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void>)GetProcAddress("glBindBufferBase"u8);
         glDeleteShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteShader"u8);
         glDeleteProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteProgram"u8);
+        glUniform1f = (delegate* unmanaged[SuppressGCTransition]<int, float, void>)GetProcAddress("glUniform1f"u8);
+        glUniform2f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, void>)GetProcAddress("glUniform2f"u8);
+        glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {
@@ -51,7 +56,9 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glCompileShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, uint*, void> glGenVertexArrays;
     static delegate* unmanaged[SuppressGCTransition]<uint, uint*, void> glGenBuffers;
+    static delegate* unmanaged[SuppressGCTransition]<uint, uint*, void> glDeleteBuffers;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glBindVertexArray;
+    static delegate* unmanaged[SuppressGCTransition]<uint, uint*, void> glDeleteVertexArray;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, void> glBindBuffer;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void> glBufferData;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void> glBufferSubData;
@@ -66,6 +73,9 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void> glBindBufferBase;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteProgram;
+    static delegate* unmanaged[SuppressGCTransition]<int, float, void> glUniform1f;
+    static delegate* unmanaged[SuppressGCTransition]<int, float, float, void> glUniform2f;
+    static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void> glUniform4f;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -86,11 +96,17 @@ public unsafe class GLEX : GL
     public static void GenerateVertexArrays(uint count, uint* array)
         => glGenVertexArrays(count, array);
 
-    public static void GenerateBuffers(uint count, uint* array)
-        => glGenBuffers(count, array);
+    public static void GenerateBuffers(uint count, uint* arrays)
+        => glGenBuffers(count, arrays);
+
+    public static void DeleteBuffers(uint count, uint* array)
+        => glDeleteBuffers(count, array);
 
     public static void BindVertexArray(uint array)
         => glBindVertexArray(array);
+
+    public static void DeleteVertexArray(uint count, uint* arrays)
+        => glDeleteVertexArray(count, arrays);
 
     public static void BindBuffer(BufferType targetType, uint array)
         => glBindBuffer(targetType, array);
@@ -158,4 +174,13 @@ public unsafe class GLEX : GL
 
     public static void DeleteProgram(uint program)
         => glDeleteProgram(program);
+
+    public static void Uniform(int index, float value)
+        => glUniform1f(index, value);
+
+    public static void Uniform(int index, float value1, float value2)
+        => glUniform2f(index, value1, value2);
+
+    public static void Uniform(int index, float value1, float value2, float value3, float value4)
+        => glUniform4f(index, value1, value2, value3, value4);
 }
