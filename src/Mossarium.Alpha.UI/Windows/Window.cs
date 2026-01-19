@@ -86,12 +86,21 @@ public unsafe class Window : GraphicsSystemWindow
     protected override void OnRender()
     {
         GL.Enable(Cap.Blend);
+        GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
 
         GL.Clear(ClearMask.Color);
 
-        GlslImpls.Program.GradientRgbTriangles.Use();
-        VertexArray.Bind();
-        VertexArray.DrawElements(Mode.Triangles, 0, 6);
+        GlslImpls.Program.AP.Use();
+
+        GL.Uniform(0, 160.0f, 120.0f);
+        GL.Uniform(1, 150.0f, 120.0f);
+        GL.Uniform(2, 20.0f);
+        GL.Uniform(3, 1.0f, 0.0f, 0.0f);
+        GL.DrawArrays(Mode.TriangleStrip, 0, 4);
+
+        //GlslImpls.Program.GradientRgbTriangles.Use();
+        //VertexArray.Bind();
+        //VertexArray.DrawElements(Mode.Triangles, 0, 6);
 
         GL.SwapBuffers(HandleToDeviceContext);
     }

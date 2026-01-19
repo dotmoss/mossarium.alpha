@@ -34,6 +34,7 @@ public unsafe class GLEX : GL
         glDeleteProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteProgram"u8);
         glUniform1f = (delegate* unmanaged[SuppressGCTransition]<int, float, void>)GetProcAddress("glUniform1f"u8);
         glUniform2f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, void>)GetProcAddress("glUniform2f"u8);
+        glUniform3f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void>)GetProcAddress("glUniform3f"u8);
         glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
@@ -75,6 +76,7 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteProgram;
     static delegate* unmanaged[SuppressGCTransition]<int, float, void> glUniform1f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, void> glUniform2f;
+    static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void> glUniform3f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void> glUniform4f;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
@@ -180,6 +182,9 @@ public unsafe class GLEX : GL
 
     public static void Uniform(int index, float value1, float value2)
         => glUniform2f(index, value1, value2);
+
+    public static void Uniform(int index, float value1, float value2, float value3)
+        => glUniform3f(index, value1, value2, value3);
 
     public static void Uniform(int index, float value1, float value2, float value3, float value4)
         => glUniform4f(index, value1, value2, value3, value4);
