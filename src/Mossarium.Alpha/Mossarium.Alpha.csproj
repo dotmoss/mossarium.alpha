@@ -9,7 +9,17 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+	<OutputType>WinExe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
   <ItemGroup>
+    <ProjectReference Include="..\FreeType\FreeType.csproj" />
+    <ProjectReference Include="..\HarfBuzz\HarfBuzz.csproj" />
     <ProjectReference Include="..\Mossarium.Alpha.UI\Mossarium.Alpha.UI.csproj" />
   </ItemGroup>
 

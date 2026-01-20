@@ -6,7 +6,16 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<AssemblyName>ManagedFreeType</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="$(SolutionDir)natives\win-x64\freetype.dll">
+	  <Link>freetype.dll</Link>
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <Visible>false</Visible>
+	</None>
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="ModuleAttributes.cs">

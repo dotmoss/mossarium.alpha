@@ -7,7 +7,6 @@ public unsafe static class User32
     const string user = "user32";
 
     #region DllImports
-    
     [DllImport(user), SuppressGCTransition] public static extern 
         int GetWindowLongW(nint hWnd, int nIndex);
 
