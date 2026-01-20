@@ -33,6 +33,12 @@ public unsafe static class FreeType
             return FT_New_Face(library, pathnamePointer, face_index, aface);
     }
 
+    public static FT_Error FT_Get_Glyph_Name(FT_Face face, uint glyph_index, Span<byte> buffer)
+    {
+        fixed (byte* bufferPointer = buffer)
+            return FT_Get_Glyph_Name(face, glyph_index, bufferPointer, (uint)buffer.Length);
+    }
+    
     const int FT_FACE_FLAG_GLYPH_NAMES = 1 << 9;
     public static bool FT_HAS_GLYPH_NAMES(FT_Face face) => (face.rec->face_flags & FT_FACE_FLAG_GLYPH_NAMES) != 0;
 }

@@ -10,6 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<None Include="$(SolutionDir)natives\win-x64\harfbuzz.dll">
+	  <Link>harfbuzz.dll</Link>
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <Visible>false</Visible>
+	</None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FreeType\FreeType.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="ModuleAttributes.cs">
       <Visible>false</Visible>
     </Compile>

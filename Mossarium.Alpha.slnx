@@ -2,18 +2,28 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/Natives/">
+    <Project Path="src/FreeType/FreeType.csproj" Id="d4938b19-3ffb-4b81-a5fd-3b161d23f7b1">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/HarfBuzz/HarfBuzz.csproj" Id="833e8153-d7ad-48b9-9e4f-2d4f72ff3a5c">
+      <Platform Project="x64" />
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="src/OpenGL/OpenGL.csproj" Id="ae1feaf1-4864-4bee-a810-3137526d871c">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/Natives/Windows/">
+    <Project Path="src/WindowsOS/WindowsOS.csproj" Id="0793d498-99a5-4781-8a7c-a3dd47fbf4d3">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
 	<File Path=".editorconfig" />
   </Folder>
-  <Project Path="src/FreeType/FreeType.csproj" Id="d4938b19-3ffb-4b81-a5fd-3b161d23f7b1">
-    <Platform Project="x64" />
-  </Project>
-  <Project Path="src/HarfBuzz/HarfBuzz.csproj" Id="833e8153-d7ad-48b9-9e4f-2d4f72ff3a5c">
-    <Platform Project="x64" />
-    <Build Solution="Release|*" Project="false" />
-  </Project>
   <Project Path="src/Mossarium.Alpha.UI.OpenGL/Mossarium.Alpha.UI.OpenGL.csproj" Id="ce8a234b-2c13-4802-ad3e-a12356014682">
     <Platform Project="x64" />
   </Project>
@@ -24,12 +34,6 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="src/Mossarium.Alpha/Mossarium.Alpha.csproj" Id="de7dddff-a4ca-49ea-a179-2d778e7d0a4c">
-    <Platform Project="x64" />
-  </Project>
-  <Project Path="src/OpenGL/OpenGL.csproj" Id="ae1feaf1-4864-4bee-a810-3137526d871c">
-    <Platform Project="x64" />
-  </Project>
-  <Project Path="src/WindowsOS/WindowsOS.csproj" Id="0793d498-99a5-4781-8a7c-a3dd47fbf4d3">
     <Platform Project="x64" />
   </Project>
 </Solution>
