@@ -8,6 +8,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+	<DefineConstants Condition=" '$(Define_UI_Unlimited_FPS)' == 'true' ">$(DefineConstants);UI_Unlimited_FPS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Mossarium.Alpha.UI.OpenGL\Mossarium.Alpha.UI.OpenGL.csproj" />
     <ProjectReference Include="..\Mossarium.Alpha.UI.Windowing\Mossarium.Alpha.UI.Windowing.csproj" />

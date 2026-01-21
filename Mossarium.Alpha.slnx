@@ -8,7 +8,6 @@
     </Project>
     <Project Path="src/HarfBuzz/HarfBuzz.csproj" Id="833e8153-d7ad-48b9-9e4f-2d4f72ff3a5c">
       <Platform Project="x64" />
-      <Build Solution="Release|*" Project="false" />
     </Project>
     <Project Path="src/OpenGL/OpenGL.csproj" Id="ae1feaf1-4864-4bee-a810-3137526d871c">
       <Platform Project="x64" />

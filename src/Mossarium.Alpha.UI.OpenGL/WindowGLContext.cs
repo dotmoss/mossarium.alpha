@@ -88,6 +88,12 @@ public unsafe class WindowGLContext : IDisposable
         if (!GL.MakeCurrent(handleToDeviceContext, context))
             throw null!;
 
+        if (Initialized is not null)
+        {
+            Initialized.Invoke();
+            Initialized = null;
+        }
+
         return context;
     }
 
@@ -101,6 +107,8 @@ public unsafe class WindowGLContext : IDisposable
     }
 
     static bool isOpenGLContextInitialized;
+
+    public static Action? Initialized;
 
     const int
         DRAW_TO_WINDOW_ARB = 0x2001,

@@ -1,5 +1,6 @@
 ﻿using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing.Structures;
+using WindowsOS;
 using static OpenGL.Enums;
 using GL = OpenGL.GLEX;
 
@@ -18,19 +19,9 @@ public unsafe class Window : GraphicsSystemWindow
         Visible = true;
     }
 
-    void UpdateGLWindowSize()
-    {
-        var glslWindowData = new GlslWindowData
-        {
-            Size = ((ushort)Size.Width, (ushort)Size.Height)
-        };
-
-        UniformBuffer.Write(glslWindowData);
-    }
-
-    GlBuffer VertexBuffer, ElementsBuffer, UniformBuffer;
-    GlVertexArray<GlVertex, ushort> VertexArray;
-    protected override void OnInitializeRender()
+    static GlBuffer VertexBuffer, ElementsBuffer, UniformBuffer;
+    static GlVertexArray<GlVertex, ushort> VertexArray;
+    static void OnGLInitialized()
     {
         GlslImpls.Compile();
 
@@ -65,10 +56,7 @@ public unsafe class Window : GraphicsSystemWindow
 
         uniformBuffer.BindToUniformBase(0);
 
-        var glslWindowData = new GlslWindowData
-        {
-            Size = ((ushort)Size.Width, (ushort)Size.Height)
-        };
+        var glslWindowData = new GlslWindowData();
         uniformBuffer.Allocate(glslWindowData);
 
         (VertexBuffer, ElementsBuffer, UniformBuffer) = (vertexBuffer, elementsBuffer, uniformBuffer);
@@ -78,13 +66,18 @@ public unsafe class Window : GraphicsSystemWindow
     protected override void OnSizeChanged(SizeI4 size)
     {
         Size = size;
-        UpdateGLWindowSize();
 
         base.OnSizeChanged(size);
-    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+    }
 
     protected override void OnRender()
     {
+        var glslWindowData = new GlslWindowData
+        {
+            Size = ((ushort)Size.Width, (ushort)Size.Height)
+        };
+        UniformBuffer.Write(glslWindowData);
+
         GL.Enable(Cap.Blend);
         GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
 
@@ -102,11 +95,11 @@ public unsafe class Window : GraphicsSystemWindow
         //VertexArray.Bind();
         //VertexArray.DrawElements(Mode.Triangles, 0, 6);
 
-        GL.SwapBuffers(HandleToDeviceContext);
+        GDI32.SwapBuffers(HandleToDeviceContext);
     }
 
-    protected override bool OnClose()
+    static Window()
     {
-        return base.OnClose();
+        WindowGLContext.Initialized += OnGLInitialized;
     }
 }

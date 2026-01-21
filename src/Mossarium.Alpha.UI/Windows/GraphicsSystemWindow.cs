@@ -7,13 +7,15 @@ using WindowsOS.Utils;
 
 namespace Mossarium.Alpha.UI.Windows;
 
-public unsafe class GraphicsSystemWindow : SystemWindow
+public unsafe class GraphicsSystemWindow : SystemWindow, IDisposable
 {
+#if !UI_Unlimited_FPS
     const int DefaultFramesPerSecond = 30;
     const int SecondsBeforeRest = 20;
     const int FramesBeforeRest = SecondsBeforeRest * DefaultFramesPerSecond;
     static readonly FrameRateInfo DefaultFrameRateInfo = new FrameRateInfo(DefaultFramesPerSecond);
     static readonly FrameRateInfo InRestFrameRateInfo = new FrameRateInfo(5);
+#endif
 
     public GraphicsSystemWindow(string title, LocationI4 location, SizeI4 size, WindowInitialAttributes attributes = WindowInitialAttributes.None)
         : base(title, location, size)
@@ -21,8 +23,11 @@ public unsafe class GraphicsSystemWindow : SystemWindow
         ApplyWindowAttributes(attributes);
     }
 
+#if !UI_Unlimited_FPS
     FrameRateInfo frameRateInfo = DefaultFrameRateInfo;
     int framesBeforeRest;
+#endif
+    WindowGLContext glContext;
 
     void ApplyWindowAttributes(WindowInitialAttributes attributes)
     {
@@ -46,8 +51,6 @@ public unsafe class GraphicsSystemWindow : SystemWindow
 
     protected virtual void OnWindowInitialized() { }
 
-    protected virtual void OnInitializeRender() { }
-
     protected override void OnMessageLoopStarted()
     {
         var thread = new Thread(StartRenderLoop)
@@ -60,6 +63,7 @@ public unsafe class GraphicsSystemWindow : SystemWindow
 
     protected virtual void OnRender() { }
 
+#if !UI_Unlimited_FPS
     protected override unsafe bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
         if (framesBeforeRest <= 0)
@@ -68,26 +72,30 @@ public unsafe class GraphicsSystemWindow : SystemWindow
         framesBeforeRest = FramesBeforeRest;
         return base.OnMessage(hWnd, message, wParam, lParam);
     }
+#endif
 
     void StartRenderLoop()
     {
+#if !UI_Unlimited_FPS
         var frameRateWatcher = new Stopwatch();
         using var frameTimer = new HighAccuracyWaitableTimer();
-        using var glContext = new WindowGLContext(HandleToDeviceContext);
-
-        OnInitializeRender();
+#endif
+        glContext = new WindowGLContext(HandleToDeviceContext);
         OnWindowInitialized();
 
         while (isRunning)
         {
+#if !UI_Unlimited_FPS
             frameRateWatcher.Restart();
 
             framesBeforeRest--;
             if (framesBeforeRest == 0)
                 frameRateInfo = InRestFrameRateInfo;
+#endif
 
             OnRender();
 
+#if !UI_Unlimited_FPS
             var spentOnFrame = frameRateWatcher.Elapsed.TotalMilliseconds;
 
             var timeToSpend = frameRateInfo.FrameDelay - spentOnFrame;
@@ -96,11 +104,21 @@ public unsafe class GraphicsSystemWindow : SystemWindow
                 var nanoseconds = (long)(timeToSpend * 10000);
                 frameTimer.Wait(nanoseconds);
             }
+#endif
         }
 
+#if !UI_Unlimited_FPS
         frameRateWatcher.Stop();
+#endif
     }
 
+    public new void Dispose()
+    {
+        glContext.Dispose();
+        base.Dispose();
+    }
+
+#if !UI_Unlimited_FPS
     struct FrameRateInfo
     {
         public FrameRateInfo(int framesPerSecond)
@@ -114,4 +132,5 @@ public unsafe class GraphicsSystemWindow : SystemWindow
         public double FrameDelay { get; init; }
         public int FloorFrameDelay { get; init; }
     }
+#endif
 }
