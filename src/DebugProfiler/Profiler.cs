@@ -28,8 +28,7 @@ public static class Profiler
     public static void Push<T>(T stage)
         where T : struct, Enum { }
 
-    public static void Pop<T>(T stage)
-        where T : struct, Enum { }
+    public static void Pop() { }
 
     public static void ShowProfiledData() { }
 #endif
