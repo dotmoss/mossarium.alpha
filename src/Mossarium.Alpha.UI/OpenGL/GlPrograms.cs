@@ -72,8 +72,13 @@ layout (std140, binding = 0) uniform WindowData
     vec2 winSizeT;
 };
 
-layout (location = 0) uniform vec2 inPosition;
-layout (location = 1) uniform vec2 inSize;
+layout (std140, binding = 1) uniform RoundedRectangleData 
+{
+    vec2 inPosition;
+    vec2 inSize;
+    vec3 inColor;
+    float inCornerRadius;
+};
 
 void main()
 {
@@ -90,10 +95,19 @@ void main()
         Shader.Fragment.AF = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
-layout (location = 0) uniform vec2 inPosition;
-layout (location = 1) uniform vec2 inSize;
-layout (location = 2) uniform float inCornerRadius;
-layout (location = 3) uniform vec3 inColor;
+layout (std140, binding = 0) uniform WindowData 
+{
+    vec2 winSize;
+    vec2 winSizeT;
+};
+
+layout (std140, binding = 1) uniform RoundedRectangleData 
+{
+    vec2 inPosition;
+    vec2 inSize;
+    vec3 inColor;
+    float inCornerRadius;
+};
 
 out vec4 color;
 

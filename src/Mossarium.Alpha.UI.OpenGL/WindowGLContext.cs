@@ -7,26 +7,7 @@ namespace Mossarium.Alpha.UI.OpenGL;
 public unsafe static class WindowGlContext
 {
     public static nint ContextHandle;
-
-    public static void InitializeSlaveContext(nint deviceContextHandle)
-    {
-        var pixelFormatDescriptor = new PixelFormatDescriptor
-        {
-            Size = (short)sizeof(PixelFormatDescriptor),
-            Version = 1,
-            PixelType = PixelTypeEnum.RGBA,
-            Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
-            ColorBits = 24,
-            AlphaBits = 0,
-            LayerType = LayerTypeEnum.MainPlane,
-            DepthBits = 0,
-            StencilBits = 0
-        };
-        var pixelFormat = GDI32.ChoosePixelFormat(deviceContextHandle, &pixelFormatDescriptor);
-        GDI32.SetPixelFormat(deviceContextHandle, pixelFormat, &pixelFormatDescriptor);
-    }
-
-    public static nint InitializeMasterContext(nint deviceContextHandle)
+    public static void InitializeContext(nint deviceContextHandle)
     {
         var pixelFormatDescriptor = new PixelFormatDescriptor
         {
@@ -46,6 +27,9 @@ public unsafe static class WindowGlContext
 
         if (!GDI32.SetPixelFormat(deviceContextHandle, pixelFormat, &pixelFormatDescriptor))
             throw null!;
+
+        if (ContextHandle != 0)
+            return;
 
         var tempContext = GL.CreateContext(deviceContextHandle);
         if (tempContext == 0)
@@ -95,7 +79,6 @@ public unsafe static class WindowGlContext
             throw null!;
 
         ContextHandle = context;
-        return context;
     }
 
     const int

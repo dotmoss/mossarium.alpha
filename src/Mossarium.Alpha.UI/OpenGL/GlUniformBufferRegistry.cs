@@ -1,7 +1,6 @@
 ﻿using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
 using System.Runtime.InteropServices;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
@@ -14,17 +13,19 @@ public static unsafe class GlUniformBufferRegistry
         var buffers = stackalloc uint[Count];
         GL.GenerateBuffers(Count, buffers);
 
-        WindowData = new GlUniformBuffer<GlslubWindowData>(buffers[0]);
+        WindowData = new GlUniformBuffer<UbWindowData>(buffers[0]);
+        RoundedRectangleData = new GlUniformBuffer<UbRoundedRectangleData>(buffers[1]);
     }
 
-    public static GlUniformBuffer<GlslubWindowData> WindowData;
+    public static GlUniformBuffer<UbWindowData> WindowData;
+    public static GlUniformBuffer<UbRoundedRectangleData> RoundedRectangleData;
 }
 
-[StructLayout(LayoutKind.Sequential, Pack = 16)]
-public struct GlslubWindowData
+[StructLayout(LayoutKind.Explicit, Size = 16)]
+public struct UbWindowData
 {
-    private SizeF4 size;
-    private SizeF4 sizeTransformer;
+    [FieldOffset(0x00)] SizeF4 size;
+    [FieldOffset(0x08)] SizeF4 sizeTransformer;
 
     public SizeU2 Size
     {
@@ -34,4 +35,13 @@ public struct GlslubWindowData
             sizeTransformer = new SizeF4(131072f / value.Width, 131072f / value.Height);
         }
     }
+}
+
+[StructLayout(LayoutKind.Explicit, Size = 48)]
+public struct UbRoundedRectangleData
+{
+    [FieldOffset(0x00)] public LocationF4 Position;
+    [FieldOffset(0x08)] public SizeF4 Size;
+    [FieldOffset(0x10)] public RgbF4 Color;
+    [FieldOffset(0x20)] public float CornerRadius;
 }

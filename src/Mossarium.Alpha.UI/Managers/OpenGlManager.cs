@@ -1,6 +1,5 @@
 ﻿using Mossarium.Alpha.UI.OpenGL;
 using OpenGL;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.Managers;
 
@@ -11,12 +10,12 @@ public unsafe static class OpenGlManager
     {
         if (isInitialContextInitialized)
         {
-            WindowGlContext.InitializeSlaveContext(window.DeviceContextHandle);
+            WindowGlContext.InitializeContext(window.DeviceContextHandle);
         }
         else
         {
             isInitialContextInitialized = true;
-            WindowGlContext.InitializeMasterContext(window.DeviceContextHandle);
+            WindowGlContext.InitializeContext(window.DeviceContextHandle);
             GlUniformBufferRegistry.Initialize();
             GlPrograms.Initialize();
         }

@@ -5,15 +5,13 @@ namespace Mossarium.Alpha.UI.OpenGL;
 public unsafe struct GlUniformBuffer<T>
     where T : unmanaged
 {
-    static uint counter;
-
     public GlUniformBuffer(uint bufferId)
     {
         buffer = GlBuffer.From(bufferId, BufferType.Uniform, BufferUsage.DynamicDraw);
         buffer.Allocate(sizeof(T));
-        buffer.BindToUniformBase(counter);
+        buffer.BindToUniformBase(BufferCounter.Value);
 
-        counter++;
+        BufferCounter.Value++;
     }
 
     GlBuffer buffer;
@@ -22,4 +20,9 @@ public unsafe struct GlUniformBuffer<T>
     {
         buffer.Write(&data, sizeof(T));
     }
+}
+
+file static class BufferCounter 
+{
+    public static uint Value;
 }

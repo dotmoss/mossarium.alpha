@@ -112,54 +112,6 @@ public unsafe static partial class User32
 
     public static nint CreateWindow(
         WindowExStyles styleEx,
-        char* className,
-        char* windowName,
-        WindowStyles style,
-        int x,
-        int y,
-        int width,
-        int height,
-        nint hWndParent,
-        nint menu,
-        nint hInstance,
-        nint lpParam)
-        => CreateWindowExW((int)styleEx, className, windowName, (int)style, x, y, width, height, hWndParent, menu, hInstance, lpParam);
-
-    public static nint CreateWindow(
-        WindowExStyles styleEx,
-        string className,
-        string windowName,
-        WindowStyles style,
-        int x,
-        int y,
-        int width,
-        int height,
-        nint hWndParent,
-        nint menu,
-        nint hInstance,
-        nint lpParam)
-    {
-        fixed (char* classNameChars = className, windowNameChars = windowName)
-            return CreateWindowExW((int)styleEx, classNameChars, windowNameChars, (int)style, x, y, width, height, hWndParent, menu, hInstance, lpParam);
-    }
-
-    public static nint CreateWindow(
-        WindowExStyles styleEx,
-        ushort className,
-        char* windowName,
-        WindowStyles style,
-        int x,
-        int y,
-        int width,
-        int height,
-        nint hWndParent,
-        nint menu,
-        nint hInstance,
-        nint lpParam)
-        => CreateWindowExW((int)styleEx, (char*)className, windowName, (int)style, x, y, width, height, hWndParent, menu, hInstance, lpParam);
-
-    public static nint CreateWindow(
-        WindowExStyles styleEx,
         ushort className,
         string windowName,
         WindowStyles style,

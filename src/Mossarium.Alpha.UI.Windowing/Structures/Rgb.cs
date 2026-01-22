@@ -2,7 +2,7 @@
 
 namespace Mossarium.Alpha.UI.Windowing.Structures;
 
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
+[StructLayout(LayoutKind.Sequential, Size = 3)]
 public struct Rgb
 {
     public Rgb(int r, int g, int b) : this((byte)r, (byte)g, (byte)b) { }

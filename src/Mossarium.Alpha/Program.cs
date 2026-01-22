@@ -7,6 +7,7 @@ namespace Mossarium.Alpha;
 // Implement InstanceManager to allow multiple mossarium windows
 // Implement AtlasPacker to pack font glyphs
 // Implement OpenGLCache to cache shaders bytecode
+// Switch to buffer ranges in uniform buffers
 unsafe class Program
 {
     static void Main()

@@ -28,11 +28,11 @@ public unsafe class Window : SystemWindow
     {
         OpenGlManager.MakeWindowCurrent(this);
 
-        var glslWindowData = new GlslubWindowData
+        var ubWindowData = new UbWindowData
         {
             Size = ((ushort)Size.Width, (ushort)Size.Height)
         };
-        GlUniformBufferRegistry.WindowData.Write(glslWindowData);
+        GlUniformBufferRegistry.WindowData.Write(ubWindowData);
 
         vertexArray.Bind();
         GL.Enable(Cap.Blend);
@@ -42,10 +42,15 @@ public unsafe class Window : SystemWindow
         
         GlPrograms.AP.Use();
 
-        GL.Uniform(0, 160.0f, 120.0f);
-        GL.Uniform(1, 150.0f, 120.0f);
-        GL.Uniform(2, 20.0f);
-        GL.Uniform(3, 1.0f, 0.0f, 0.0f);
+        var ubRoundedRectangleData = new UbRoundedRectangleData
+        {
+            Position = (160, 120),
+            Size = (150, 120),
+            CornerRadius = 20,
+            Color = (1, 0, 0)
+        };
+        GlUniformBufferRegistry.RoundedRectangleData.Write(ubRoundedRectangleData);
+
         GL.DrawArrays(Mode.TriangleStrip, 0, 4);
 
         GDI32.SwapBuffers(DeviceContextHandle);
