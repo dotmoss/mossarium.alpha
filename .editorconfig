@@ -2,3 +2,6 @@
 
 # IDE0002: Simplify Member Access
 dotnet_diagnostic.IDE0002.severity = none
+
+# CS8500: This takes the address of, gets the size of, or declares a pointer to a managed type
+dotnet_diagnostic.CS8500.severity = none

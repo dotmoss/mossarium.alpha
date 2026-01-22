@@ -7,6 +7,6 @@ public enum WindowLongField : int
     HwndParent = -8,
     Style = -16,
     ExStyle = -20,
-    Userdata = -21,
+    UserData = -21,
     ID = -12,
 }

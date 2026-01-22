@@ -1,5 +1,5 @@
-﻿using Mossarium.Alpha.UI.Windowing.Structures;
-using Mossarium.Alpha.UI.Windows;
+﻿using Mossarium.Alpha.UI;
+using Mossarium.Alpha.UI.Windowing.Structures;
 using WindowsOS;
 
 namespace Mossarium.Alpha.Windows;

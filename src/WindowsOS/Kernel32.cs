@@ -6,6 +6,7 @@ public unsafe class Kernel32
 {
     const string kernel = "kernel32";
 
+    #region DllImports
     [DllImport(kernel), SuppressGCTransition] public static extern
         nint GetModuleHandleA(byte* name);
 
@@ -14,6 +15,9 @@ public unsafe class Kernel32
 
     [DllImport(kernel), SuppressGCTransition] public static extern
         nint LoadLibraryA(byte* dllPath);
+
+    [DllImport(kernel), SuppressGCTransition] public static extern
+        int GetCurrentThreadId();
 
     [DllImport(kernel), SuppressGCTransition] public static extern 
         nint CreateWaitableTimer(
@@ -38,6 +42,19 @@ public unsafe class Kernel32
 
     [DllImport(kernel), SuppressGCTransition] public static extern
         uint WaitForSingleObjectEx(nint hHandle, uint dwMilliseconds, bool bAlertable);
+
+    [DllImport(kernel), SuppressGCTransition] public static extern
+        int WaitForMultipleObjects(int nCount, nint* lpHandles, bool bWaitAll, uint dwMilliseconds);
+
+    [DllImport(kernel), SuppressGCTransition] public static extern
+        int WaitForMultipleObjectsEx(int nCount, nint* lpHandles, bool bWaitAll, uint dwMilliseconds, bool bAlertable);
+
+    [DllImport(kernel), SuppressGCTransition] public static extern 
+        nint CreateEventA(nint lpEventAttributes, bool bManualReset, bool bInitialState, byte* lpName);
+
+    [DllImport(kernel), SuppressGCTransition] public static extern 
+        int SetEvent(nint hEvent);
+    #endregion
 
     public static nint GetModuleHandle(ReadOnlySpan<byte> name)
     {

@@ -5,7 +5,7 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public unsafe struct GlslProgram : IDisposable
 {
-    public GlslProgram(ReadOnlySpan<GlslShader> shaders)
+    public GlslProgram(params ReadOnlySpan<GlslShader> shaders)
     {
         var programId = GL.CreateProgram();
         for (var shaderIndex = 0; shaderIndex < shaders.Length; shaderIndex++)

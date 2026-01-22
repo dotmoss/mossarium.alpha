@@ -1,74 +1,101 @@
 ﻿using Mossarium.Alpha.UI.Windowing.Structures;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using WindowsOS;
 
 namespace Mossarium.Alpha.UI.Windowing;
 
-public unsafe partial class SystemWindow : IDisposable
+public unsafe abstract partial class SystemWindow : IDisposable
 {
-    public static Rgb TransparentColor = (56, 30, 12);
-
-    public SystemWindow(string title, LocationI4 location, SizeI4 size)
+    public SystemWindow(string title, LocationI4 location, SizeI4 size, WindowInitialAttributes attributes)
     {
-        internalWindow = SystemWindowInternal.Create(title, location, size);
-        UpdateProperties();
+        NativeWindow = NativeWindow.Create(title, location, size);
+
+        var styles = WindowStyles.Overlapped;
+        if ((attributes & WindowInitialAttributes.HasCaption) > 0)
+        {
+            styles = WindowStyles.Caption | WindowStyles.SizeFrame;
+            if ((attributes & WindowInitialAttributes.HasMinimizeButton) > 0)
+                styles |= WindowStyles.MinimizeBox;
+            if ((attributes & WindowInitialAttributes.HasMaximizeButton) > 0)
+                styles |= WindowStyles.MaximizeBox;
+            if ((attributes & WindowInitialAttributes.HasCloseButton) > 0)
+                styles |= WindowStyles.SystemMenu;
+        }
+
+        if ((attributes & WindowInitialAttributes.Maximaze) > 0)
+            styles |= WindowStyles.Maximize;
+
+        Style = styles;
     }
 
-    protected bool isRunning;
-    readonly SystemWindowInternal internalWindow;
+    NativeWindow nativeWindow;
     RectangleI4 cachedRectangle;
 
-    public string Title { get => internalWindow.Title; set => internalWindow.Title = value; }
+    public NativeWindow NativeWindow
+    {
+        get => nativeWindow;
+        set
+        {
+            nativeWindow = value;
+
+            var oldCachedRectangle = cachedRectangle;
+            cachedRectangle = nativeWindow.Rectangle;
+
+            if (oldCachedRectangle.X != 0 || oldCachedRectangle.Y != 0 || oldCachedRectangle.Width != 0 || oldCachedRectangle.Height != 0)
+            {
+                OnLocationChanged(X, Y);
+                OnSizeChanged(Width, Height);
+            }
+        }
+    }
+
+    public string Title { get => nativeWindow.Title; set => nativeWindow.Title = value; }
 
     public RectangleI4 Rectangle
     { 
         get => cachedRectangle; 
-        set => internalWindow.Rectangle = value;
+        set => nativeWindow.Rectangle = value;
     }
 
     public LocationI4 Location 
     {
         get => cachedRectangle.Location;
-        set => internalWindow.Location = cachedRectangle.Location = value;
+        set => nativeWindow.Location = cachedRectangle.Location = value;
     }
 
     public SizeI4 Size
     {
         get => cachedRectangle.Size;
-        set => internalWindow.Size = cachedRectangle.Size = value;
+        set => nativeWindow.Size = cachedRectangle.Size = value;
     }
 
     public int X
     {
         get => cachedRectangle.X;
-        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { X = value };
+        set => nativeWindow.Rectangle = cachedRectangle = cachedRectangle with { X = value };
     }
 
     public int Y
     {
         get => cachedRectangle.Y;
-        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Y = value };
+        set => nativeWindow.Rectangle = cachedRectangle = cachedRectangle with { Y = value };
     }
 
     public int Width 
     {
         get => cachedRectangle.Width;
-        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Width = value };
+        set => nativeWindow.Rectangle = cachedRectangle = cachedRectangle with { Width = value };
     }
 
     public int Height
     {
         get => cachedRectangle.Height;
-        set => internalWindow.Rectangle = cachedRectangle = cachedRectangle with { Height = value };
+        set => nativeWindow.Rectangle = cachedRectangle = cachedRectangle with { Height = value };
     }
 
-    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public WindowStyles Style { get => internalWindow.Style; set => internalWindow.Style = value; }
-
-    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public WindowExStyles ExStyle { get => internalWindow.ExStyle; set => internalWindow.ExStyle = value; }
+    public WindowStyles Style { get => nativeWindow.Style; set => nativeWindow.Style = value; }
+        
+    public WindowExStyles ExStyle { get => nativeWindow.ExStyle; set => nativeWindow.ExStyle = value; }
 
     public bool Visible
     {
@@ -95,60 +122,16 @@ public unsafe partial class SystemWindow : IDisposable
         }
     }
 
-    public nint Handle => internalWindow.Handle;
+    public nint Handle => nativeWindow.Handle;
 
-    public nint HandleToDeviceContext => internalWindow.HDC;
-    
-    public bool IsActive { get; private set; }
-    
-    void UpdateProperties()
-    {
-        cachedRectangle = internalWindow.Rectangle;
-    }
-
-    public void TransferThreadControl()
-    {
-        StartMessageLoop();
-    }
+    public nint DeviceContextHandle => nativeWindow.HDC;
 
     protected virtual bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
-        //Debug.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
+        //Console.WriteLine($"{message}: (0x{wParam:X}, 0x{lParam})");
 
         switch (message)
         {
-            case WindowMessage.Close:
-            case WindowMessage.Quit:
-            case WindowMessage.Command when wParam == 0x02:
-                {                    
-                    return OnClose();
-                }
-            case WindowMessage.Char:
-                {
-                    return OnInput((char)wParam);
-                }
-            case WindowMessage.KeyDown:
-                {
-                    var downKey = Message.DecodeDownKey(wParam, lParam);
-
-                    if (downKey.IsRepeat)
-                        return OnKeyPress(downKey.Key);
-                    else return OnKeyDownInternal(downKey.Key);
-                }
-            case WindowMessage.KeyUp:
-                {
-                    var downKey = Message.DecodeDownKey(wParam, lParam);
-
-                    return OnKeyUpInternal(downKey.Key);
-                }
-            case WindowMessage.Activate:
-                {
-                    var isActive = wParam == 1;
-                    IsActive = isActive;
-                    OnActiveChanged(isActive);
-
-                    break;
-                }
             case WindowMessage.Size:
                 {
                     const ulong SIZE_MAXHIDE = 4;
@@ -157,9 +140,114 @@ public unsafe partial class SystemWindow : IDisposable
                     if (wParam is not SIZE_MAXHIDE and not SIZE_MAXSHOW)
                     {
                         var size = Message.DecodeSize(lParam);
-                        OnSizeChanged(new SizeI4(size.X, size.Y));
+                        Size = new SizeI4(size.Width, size.Height);
+                        OnSizeChanged(size.Width, size.Height);
                     }
 
+                    break;
+                }
+            case WindowMessage.Move:
+                {
+                    var location = Message.DecodeLocation(lParam);
+
+                    Location = new LocationI4(location.X, location.Y);
+                    OnLocationChanged(location.X, location.Y);
+                    break;
+                }
+            case WindowMessage.KeyDown:
+                {
+                    var downKey = Message.DecodeDownKey(wParam, lParam);
+                    var key = downKey.Key;
+
+                    if (downKey.IsRepeat)
+                    {
+                        OnKeyPressed(key);
+                    }
+                    else
+                    {
+                        PressedKeyCollection.Insance.NotifyPress(key);
+                        OnKeyDown(key);
+                    }
+
+                    break;
+                }
+            case WindowMessage.KeyUp:
+                {
+                    var downKey = Message.DecodeDownKey(wParam, lParam);
+                    var key = downKey.Key;
+
+                    PressedKeyCollection.Insance.NotifyUnpress(key);
+                    OnKeyUp(key);
+                    break;
+                }
+            case WindowMessage.Char:
+                {
+                    OnInput((char)wParam);
+                    break;
+                }
+            case WindowMessage.LButtonDown:
+                {
+                    OnMouseLeftDown();
+                    break;
+                }
+            case WindowMessage.RButtonDown:
+                {
+                    OnMouseRightDown();
+                    break;
+                }
+            case WindowMessage.LButtonUp:
+                {
+                    OnMouseLeftUp();
+                    OnMouseLeftClick();
+                    break;
+                }
+            case WindowMessage.RButtonUp:
+                {
+                    OnMouseRightUp();
+                    OnMouseRightClick();
+                    break;
+                }
+            case WindowMessage.LButtonDoubleClick:
+                {
+                    OnMouseLeftDoubleClick();
+                    break;
+                }
+            case WindowMessage.RButtonDoubleClick:
+                {
+                    OnMouseRightDoubleClick();
+                    break;
+                }
+            case WindowMessage.Activate:
+                {
+                    var isActive = wParam == 1;
+                    
+                    if (isActive)
+                    {
+                        OnActive();
+                    }
+                    else
+                    {
+                        var pressedKeys = stackalloc Keys[264];
+                        var count = PressedKeyCollection.Insance.WriteOutPressedKeys(pressedKeys);
+                        for (var index = 0; index < count; index++)
+                        {
+                            var key = pressedKeys[index];
+                            OnKeyUp(key);
+                        }
+
+                        PressedKeyCollection.Insance.Clear();
+
+                        OnDeactive();
+                    }
+
+                    break;
+                }
+            case WindowMessage.Close:
+            case WindowMessage.Quit:
+            case WindowMessage.Command when wParam == 0x02:
+                {
+                    OnClose();
+                    Dispose();
                     break;
                 }
         }
@@ -167,106 +255,33 @@ public unsafe partial class SystemWindow : IDisposable
         return true;
     }
 
-    protected virtual void OnActiveChanged(bool isActive)
-    {
-        if (!isActive)
-        {
-            var pressedKeys = stackalloc Keys[264];
-            var count = PressedKeyCollection.Insance.WriteOutPressedKeys(pressedKeys);
-            for (var index = 0; index < count; index++)
-            {
-                var key = pressedKeys[index];
-                OnKeyUp(key);
-            }
-
-            PressedKeyCollection.Insance.Clear();
-        }
-    }
-
-    protected virtual void OnSizeChanged(SizeI4 size) { }
-
-    protected virtual bool OnClose() 
-    {
-        Dispose();
-        return true;
-    }
-
-    protected virtual bool OnKeyPress(Keys key)
-    {
-        return true;
-    }
-
-    protected bool OnKeyDownInternal(Keys key)
-    {
-        PressedKeyCollection.Insance.NotifyPress(key);
-        return OnKeyDown(key);
-    }
-
-    protected virtual bool OnKeyDown(Keys key)
-    {
-        return true;
-    }
-
-    protected bool OnKeyUpInternal(Keys key)
-    {
-        PressedKeyCollection.Insance.NotifyUnpress(key);
-        return OnKeyUp(key);
-    }
-
-    protected virtual bool OnKeyUp(Keys key)
-    {
-        return true;
-    }
-
-    protected virtual bool OnInput(char @char)
-    {
-        return true;
-    }
-
-    protected virtual void OnMessageLoopStarted() { }
-
-    void StartMessageLoop()
-    {
-        if (isRunning)
-            throw new Exception($"{nameof(SystemWindow)}->{nameof(StartMessageLoop)}: UI Thread is already running");
-        isRunning = true;
-
-        Thread.CurrentThread.Name = $"UI Message Loop Thread 0x{Handle:X}";
-        ThreadLocalInstance = this;
-
-        OnMessageLoopStarted();
-
-        User32.SetWindowWndProcFunction(Handle, (nint)(delegate* unmanaged<nint, WindowMessage, ulong, ulong, long>)&WndProc);
-
-        Message message;
-        while (isRunning)
-        {
-            internalWindow.GetMessage(&message);
-            internalWindow.TranslateMessage(&message);
-            internalWindow.DispatchMessage(&message);
-        }
-
-        ThreadLocalInstance = null;
-    }
-
-    [UnmanagedCallersOnly]
-    static long WndProc(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
-    {
-        var instance = ThreadLocalInstance;
-        Debug.Assert(instance is not null);
-
-        if (instance.OnMessage(hWnd, message, wParam, lParam))
-            return User32.CallDefaultWindowProccess(instance.Handle, message, wParam, lParam);
-        
-        return 0;
-    }
+    protected virtual void OnSizeChanged(int width, int height) { }
+    protected virtual void OnLocationChanged(int x, int y) { }
+    protected virtual void OnKeyPressed(Keys key) { }
+    protected virtual void OnKeyDown(Keys key) { }
+    protected virtual void OnKeyUp(Keys key) { }
+    protected virtual void OnInput(char symbol) { }
+    protected virtual void OnMouseLeftDown() { }
+    protected virtual void OnMouseRightDown() { }
+    protected virtual void OnMouseLeftUp() { }
+    protected virtual void OnMouseRightUp() { }
+    protected virtual void OnMouseLeftClick() { }
+    protected virtual void OnMouseRightClick() { }
+    protected virtual void OnMouseLeftDoubleClick() { }
+    protected virtual void OnMouseRightDoubleClick() { }
+    protected virtual void OnActive() { }
+    protected virtual void OnDeactive() { }
+    protected virtual void OnClose() { }
 
     public void Dispose()
     {
-        isRunning = false;
+        nativeWindow.Dispose();
     }
 
-    // Otherwise use dynamically compiled thunk. But is not it overengineering? :)
-    [ThreadStatic, AllowNull]
-    static SystemWindow ThreadLocalInstance;
+    public static Rgb TransparentColor = (56, 30, 12);
+
+    public static class Dispatcher
+    {
+        public static bool OnMessage(SystemWindow self, nint hWnd, WindowMessage message, ulong wParam, ulong lParam) => self.OnMessage(hWnd, message, wParam, lParam);
+    }
 }

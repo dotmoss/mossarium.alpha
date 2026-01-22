@@ -1677,12 +1677,12 @@ public static class Enums
         DynamicCopy = GL_DYNAMIC_COPY,
     }
 
-    const int GL_COMPUTE_SHADER = 0x91B9; // From 4.3 OpenGL
-    const int GL_VERTEX_SHADER = 0x8B31; // From 2.0 OpenGL
+    const int GL_COMPUTE_SHADER = 0x91B9;
+    const int GL_VERTEX_SHADER = 0x8B31;
     const int GL_TESS_CONTROL_SHADER = 0x8E88;
     const int GL_TESS_EVALUATION_SHADER = 0x8E87;
-    const int GL_GEOMETRY_SHADER = 0x8DD9; // From 3.2 OpenGL
-    const int GL_FRAGMENT_SHADER = 0x8B30; // From 2.0 OpenGL
+    const int GL_GEOMETRY_SHADER = 0x8DD9;
+    const int GL_FRAGMENT_SHADER = 0x8B30;
     public enum ShaderType
     {
         Compute = GL_COMPUTE_SHADER,
@@ -1723,5 +1723,21 @@ public static class Enums
         ActiveAttributeMaxLength = GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
         ActiveUniforms = GL_ACTIVE_UNIFORMS,
         ActiveUniformMaxLength = GL_ACTIVE_UNIFORM_MAX_LENGTH
+    }
+
+    const int GL_DEBUG_SOURCE_API = 0x8246;
+    const int GL_DEBUG_SOURCE_WINDOW_SYSTEM = 0x8247;
+    const int GL_DEBUG_SOURCE_SHADER_COMPILER = 0x8248;
+    const int GL_DEBUG_SOURCE_THIRD_PARTY = 0x8249;
+    const int GL_DEBUG_SOURCE_APPLICATION = 0x824A;
+    const int GL_DEBUG_SOURCE_OTHER = 0x824B;
+    public enum DebugSource
+    {
+        Api = GL_DEBUG_SOURCE_API,
+        WindowSystem = GL_DEBUG_SOURCE_WINDOW_SYSTEM,
+        ShaderCompiler = GL_DEBUG_SOURCE_SHADER_COMPILER,
+        ThirdParty = GL_DEBUG_SOURCE_THIRD_PARTY,
+        Application = GL_DEBUG_SOURCE_APPLICATION,
+        Other = GL_DEBUG_SOURCE_OTHER
     }
 }

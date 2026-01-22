@@ -1,0 +1,65 @@
+﻿using Mossarium.Alpha.UI.Managers;
+using Mossarium.Alpha.UI.OpenGL;
+using Mossarium.Alpha.UI.Windowing;
+using Mossarium.Alpha.UI.Windowing.Structures;
+using WindowsOS;
+using static OpenGL.Enums;
+using GL = OpenGL.GLEX;
+
+namespace Mossarium.Alpha.UI;
+
+public unsafe class Window : SystemWindow
+{
+    public Window(string title, LocationI4 location, SizeI4 size, WindowInitialAttributes attributes = WindowInitialAttributes.None)
+        : base(title, location, size, attributes)
+    {
+
+    }
+
+    public WindowManager.PrivateWindowManagerData PrivateWindowManagerData;
+
+    protected virtual void OnRendererInitialized()
+    {
+        vertexArray = GlVertexArray<GlVertex, ushort>.Create();
+    }
+
+    GlVertexArray<GlVertex, ushort> vertexArray;
+    protected virtual void OnRender()
+    {
+        OpenGlManager.SetActiveContext(this);
+
+        var glslWindowData = new GlslubWindowData
+        {
+            Size = ((ushort)Size.Width, (ushort)Size.Height)
+        };
+        GlUniformBufferRegistry.WindowData.Write(glslWindowData);
+
+        vertexArray.Bind();
+        GL.Enable(Cap.Blend);
+        GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
+
+        GL.Clear(ClearMask.Color);
+            
+        GlslImpl.Program.AP.Use();
+
+        GL.Uniform(0, 160.0f, 120.0f);
+        GL.Uniform(1, 150.0f, 120.0f);
+        GL.Uniform(2, 20.0f);
+        GL.Uniform(3, 1.0f, 0.0f, 0.0f);
+        GL.DrawArrays(Mode.TriangleStrip, 0, 4);
+
+        GDI32.SwapBuffers(DeviceContextHandle);
+    }
+
+    public new void Dispose()
+    {
+        WindowManager.NotifyWindowDeleting(this);
+        base.Dispose();
+    }
+
+    public static new class Dispatcher
+    {
+        public static void OnRender(Window window) => window.OnRender();
+        public static void OnRendererInitialized(Window window) => window.OnRendererInitialized();
+    }
+}

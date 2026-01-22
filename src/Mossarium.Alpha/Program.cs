@@ -1,4 +1,5 @@
-﻿using Mossarium.Alpha.Windows;
+﻿using Mossarium.Alpha.UI.Managers;
+using Mossarium.Alpha.Windows;
 
 namespace Mossarium.Alpha;
 
@@ -10,7 +11,14 @@ unsafe class Program
 {
     static void Main()
     {
-        new ApplicationWindow().TransferThreadControl();
+        ThreadManager.VisitAsMainThread();
+
+        var window = new ApplicationWindow();
+
+        WindowManager.InitializeWindow(window);
+        window.Visible = true;
+
+        WindowManager.TransferUIThreadControl();
     }
 }
 

@@ -1,23 +1,28 @@
 ﻿namespace WindowsOS.Utils;
 
-public unsafe class HighAccuracyWaitableTimer : IDisposable
+public unsafe struct HighAccuracyWaitableTimer : IDisposable
 {
     public HighAccuracyWaitableTimer()
     {
-        handle = Kernel32.CreateWaitableTimer(default/*2: unsupported*/, true, null);
+        Handle = Kernel32.CreateWaitableTimer(default/*2: unsupported*/, true, null);
     }
 
-    nint handle;
+    public readonly nint Handle;
+
+    public void ResetTimer(long nanoseconds)
+    {
+        var negativeNanoseconds = -nanoseconds;
+        Kernel32.SetWaitableTimer(Handle, &negativeNanoseconds, 0, default, default, false);
+    }
 
     public void Wait(long nanoseconds)
     {
-        var negativeNanoseconds = -nanoseconds;
-        Kernel32.SetWaitableTimer(handle, &negativeNanoseconds, 0, default, default, false);
-        Kernel32.WaitForSingleObjectEx(handle, true);
+        ResetTimer(nanoseconds);
+        Kernel32.WaitForSingleObjectEx(Handle, true);
     }
 
     public void Dispose()
     {
-        Kernel32.CloseHandle(handle);
+        Kernel32.CloseHandle(Handle);
     }
 }

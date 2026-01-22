@@ -10,18 +10,32 @@ public struct Message
     public long Point;
     public int Private;
 
+    public static Location DecodeLocation(ulong lParam) => new Location(lParam);
+
+    public struct Location
+    {
+        public Location(ulong lParam)
+        {
+            X = (int)(lParam & 0xFFFF);
+            Y = (int)(lParam >> 16);
+        }
+
+        public int X;
+        public int Y;
+    }
+
     public static Size DecodeSize(ulong lParam) => new Size(lParam);
 
     public struct Size
     {
         public Size(ulong lParam)
         {
-            X = (int)(lParam & 0xFFFF);
-            X = (int)(lParam >> 16);
+            Width = (int)(lParam & 0xFFFF);
+            Height = (int)(lParam >> 16);
         }
 
-        public int X; 
-        public int Y;
+        public int Width; 
+        public int Height;
     }
 
     public static DownKey DecodeDownKey(ulong wParam, ulong lParam) => new DownKey(wParam, lParam);
@@ -45,8 +59,6 @@ public struct Message
         public bool IsAltDown => (state & KeyDownState.ALTDOWN) != 0;
         public bool IsRepeat => (state & KeyDownState.REPEAT) != 0;
         public bool IsUp => (state & KeyDownState.UP) != 0;
-
-        public override string ToString() => $"{{{key}, {state}}}";
     }
 
     [Flags]

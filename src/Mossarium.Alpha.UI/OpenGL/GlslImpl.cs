@@ -1,12 +1,11 @@
-﻿using Mossarium.Alpha.UI.OpenGL;
-using static OpenGL.Enums;
+﻿using static OpenGL.Enums;
 using GL = OpenGL.GLEX;
 
-namespace Mossarium.Alpha.UI;
+namespace Mossarium.Alpha.UI.OpenGL;
 
-public static class GlslImpls
+public static class GlslImpl
 {
-    public static void Compile()
+    public static void Initialize()
     {
         Shader.Vertex.GradientRgbTriangles = new GlslShader(ShaderType.Vertex,
 @"#version 430 core
@@ -45,10 +44,10 @@ void main()
     FragColor = vec4(fragColor, 1.0);
 }"u8);
 
-        Program.GradientRgbTriangles = new GlslProgram([
+        Program.GradientRgbTriangles = new GlslProgram(
             Shader.Vertex.GradientRgbTriangles,
             Shader.Fragment.RgbToRgba
-        ]);
+        );
 
         Shader.Vertex.AV = new GlslShader(ShaderType.Vertex,
 @"#version 430 core
@@ -101,10 +100,10 @@ void main()
     color = vec4(inColor, smoothedAlpha);
 }"u8);
 
-        Program.AP = new GlslProgram([
+        Program.AP = new GlslProgram(
             Shader.Vertex.AV,
             Shader.Fragment.AF
-        ]);
+        );
     }
 
     public static class Shader

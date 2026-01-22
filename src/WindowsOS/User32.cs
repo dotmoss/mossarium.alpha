@@ -10,17 +10,30 @@ public unsafe static class User32
     [DllImport(user), SuppressGCTransition] public static extern 
         int GetWindowLongW(nint hWnd, int nIndex);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         int SetWindowLongW(nint hWnd, int nIndex, int dwNewLong);
 
     [DllImport(user), SuppressGCTransition] public static extern 
         long GetWindowLongPtrW(nint hWnd, int nIndex);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         long SetWindowLongPtrW(nint hWnd, int nIndex, long dwNewLong);
 
     [DllImport(user), SuppressGCTransition] public static extern 
-        nint CreateWindowExW(int dwExStyle, char* lpClassName, char* lpWindowName, int dwStyle, int x, int y, int nWidth, int nHeight, nint hWndParent, nint hMenu, nint hInstance, nint lpParam);
+        nint CreateWindowExW(
+            int dwExStyle, 
+            char* lpClassName, 
+            char* lpWindowName, 
+            int dwStyle, 
+            int x, 
+            int y,
+            int nWidth, 
+            int nHeight, 
+            nint hWndParent, 
+            nint hMenu, 
+            nint hInstance, 
+            nint lpParam
+        );
 
     [DllImport(user), SuppressGCTransition] public static extern 
         int GetWindowTextW(nint hWnd, char* lpString, int nMaxCount);
@@ -28,10 +41,10 @@ public unsafe static class User32
     [DllImport(user), SuppressGCTransition] public static extern 
         int SetWindowTextW(nint hWnd, char* lpString);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         int SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         int GetWindowRect(nint hWnd, int* pRect);
 
     [DllImport(user)] public static extern 
@@ -46,7 +59,7 @@ public unsafe static class User32
     [DllImport(user), SuppressGCTransition] public static extern
         int ReleaseDC(nint hWnd, nint hDC);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [DllImport(user)] public static extern
         int DestroyWindow(nint hWnd);
 
     [DllImport(user)] public static extern 
@@ -70,8 +83,11 @@ public unsafe static class User32
     [DllImport(user), SuppressGCTransition] public static extern 
         int GetSystemMetrics(int nIndex);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [DllImport(user)] public static extern 
         int SetLayeredWindowAttributes(nint hwnd, int colorRef, byte alpha, int flags);
+
+    [DllImport(user), SuppressGCTransition] public static extern
+        int MsgWaitForMultipleObjectsEx(int nCount, nint* pHandles, uint dwMilliseconds, QueueStatus dwWakeMask, MessageWMO dwFlags);
     #endregion
 
     public static int MessageBox(nint handle, string text, string caption, uint type)
@@ -82,9 +98,11 @@ public unsafe static class User32
 
     public static int MessageBox(string text, string caption = "") => MessageBox(0, text, caption, 0);
 
-    public static int PeekMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax, uint removeMessage) => PeekMessageW(message, handle, msgFilterMin, msgFilterMax, removeMessage);
+    public static int PeekMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax, uint removeMessage) 
+        => PeekMessageW(message, handle, msgFilterMin, msgFilterMax, removeMessage);
 
-    public static int GetMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax) => GetMessageW(message, handle, msgFilterMin, msgFilterMax);
+    public static int GetMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax) 
+        => GetMessageW(message, handle, msgFilterMin, msgFilterMax);
 
     public static int GetWindowLong(nint handle, WindowLongField field) => GetWindowLongW(handle, (int)field);
     public static void SetWindowLong(nint handle, WindowLongField field, int value) => SetWindowLongW(handle, (int)field, value);

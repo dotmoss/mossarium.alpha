@@ -36,6 +36,8 @@ public unsafe class GLEX : GL
         glUniform2f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, void>)GetProcAddress("glUniform2f"u8);
         glUniform3f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void>)GetProcAddress("glUniform3f"u8);
         glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
+        glPushDebugGroup = (delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void>)GetProcAddress("glPushDebugGroup"u8);
+        glPopDebugGroup = (delegate* unmanaged[SuppressGCTransition]<void>)GetProcAddress("glPopDebugGroup"u8);
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {
@@ -78,6 +80,8 @@ public unsafe class GLEX : GL
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, void> glUniform2f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void> glUniform3f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void> glUniform4f;
+    static delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void> glPushDebugGroup;
+    static delegate* unmanaged[SuppressGCTransition]<void> glPopDebugGroup;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -188,4 +192,16 @@ public unsafe class GLEX : GL
 
     public static void Uniform(int index, float value1, float value2, float value3, float value4)
         => glUniform4f(index, value1, value2, value3, value4);
+
+    public static void PushDebugGroup(DebugSource source, uint id, int length, byte* message)
+        => glPushDebugGroup(source, id, length, message);
+
+    public static void PopDebugGroup()
+        => glPopDebugGroup();
+
+    public static void PushDebugGroup(DebugSource source, uint id, ReadOnlySpan<byte> message)
+    {
+        fixed (byte* messagePointer = message)
+            PushDebugGroup(source, id, -1, messagePointer);
+    }
 }

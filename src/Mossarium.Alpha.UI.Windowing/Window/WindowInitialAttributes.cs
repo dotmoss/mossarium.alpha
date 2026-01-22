@@ -1,4 +1,4 @@
-﻿namespace Mossarium.Alpha.UI;
+﻿namespace Mossarium.Alpha.UI.Windowing;
 
 public enum WindowInitialAttributes
 {

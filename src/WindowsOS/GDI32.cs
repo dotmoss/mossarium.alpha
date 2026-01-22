@@ -6,6 +6,7 @@ public static unsafe class GDI32
 {
     const string gdi = "gdi32";
 
+    #region DllImports
     [DllImport(gdi), SuppressGCTransition] public static extern
         nint GetStockObject(StockObjects fnObject);
 
@@ -20,4 +21,5 @@ public static unsafe class GDI32
 
     [DllImport(gdi), SuppressGCTransition] public static extern
         bool SwapBuffers(nint hdc);
+    #endregion
 }

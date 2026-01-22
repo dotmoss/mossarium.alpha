@@ -4,57 +4,45 @@ using static WindowsOS.PixelFormatDescriptor;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-public unsafe class WindowGLContext : IDisposable
+public unsafe static class WindowGlContext
 {
-    public WindowGLContext(nint handleToDeviceContext)
-    {
-        this.handleToDeviceContext = handleToDeviceContext;
-        WindowContextHandle = InitializeWindowContext();
-    }
+    public static nint Handle;
 
-    public readonly nint WindowContextHandle;
-    readonly nint handleToDeviceContext;
-
-    nint InitializeWindowContext()
+    public static nint Initialize(nint deviceContextHandle)
     {
-        if (!isOpenGLContextInitialized)
+        var pixelFormatDescriptor = new PixelFormatDescriptor
         {
-            isOpenGLContextInitialized = true;
+            Size = (short)sizeof(PixelFormatDescriptor),
+            Version = 1,
+            PixelType = PixelTypeEnum.RGBA,
+            Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
+            ColorBits = 24,
+            AlphaBits = 0,
+            LayerType = LayerTypeEnum.MainPlane,
+            DepthBits = 0,
+            StencilBits = 0
+        };
+        var pixelFormat = GDI32.ChoosePixelFormat(deviceContextHandle, &pixelFormatDescriptor);
+        if (pixelFormat == 0)
+            throw null!;
 
-            var pixelFormatDescriptor = new PixelFormatDescriptor
-            {
-                Size = (short)sizeof(PixelFormatDescriptor),
-                Version = 1,
-                PixelType = PixelTypeEnum.RGBA,
-                Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
-                ColorBits = 24,
-                AlphaBits = 0,
-                LayerType = LayerTypeEnum.MainPlane,
-                DepthBits = 0,
-                StencilBits = 0
-            };
-            var pixelFormat = GDI32.ChoosePixelFormat(handleToDeviceContext, &pixelFormatDescriptor);
-            if (pixelFormat == 0)
-                throw null!;
+        if (!GDI32.SetPixelFormat(deviceContextHandle, pixelFormat, &pixelFormatDescriptor))
+            throw null!;
 
-            if (!GDI32.SetPixelFormat(handleToDeviceContext, pixelFormat, &pixelFormatDescriptor))
-                throw null!;
+        var tempContext = GL.CreateContext(deviceContextHandle);
+        if (tempContext == 0)
+            throw null!;
 
-            var tempContext = GL.CreateContext(handleToDeviceContext);
-            if (tempContext == 0)
-                throw null!;
+        if (!GL.MakeCurrent(deviceContextHandle, tempContext))
+            throw null!;
 
-            if (!GL.MakeCurrent(handleToDeviceContext, tempContext))
-                throw null!;
+        GLEX.InititalizeContextFunctions();
 
-            GLEX.InititalizeContextFunctions();
+        if (!GL.MakeCurrent(deviceContextHandle, 0))
+            throw null!;
 
-            if (!GL.MakeCurrent(handleToDeviceContext, 0))
-                throw null!;
-
-            if (!GL.DeleteContext(tempContext))
-                throw null!;
-        }
+        if (!GL.DeleteContext(tempContext))
+            throw null!;
 
         var iAttributes = stackalloc int[]
         {
@@ -71,44 +59,26 @@ public unsafe class WindowGLContext : IDisposable
         var fAttributes = stackalloc float[0];
         int formats;
         uint numFormats;
-        if (!GLEX.ChoosePixelFormatARB(handleToDeviceContext, iAttributes, fAttributes, 1, &formats, &numFormats))
+        if (!GLEX.ChoosePixelFormatARB(deviceContextHandle, iAttributes, fAttributes, 1, &formats, &numFormats))
             throw null!;
 
-        var gl33Attributes = stackalloc int[]
+        var glAttributes = stackalloc int[]
         {
             CONTEXT_MAJOR_VERSION_ARB, 4,
             CONTEXT_MINOR_VERSION_ARB, 3,
             CONTEXT_PROFILE_MASK_ARB,  CONTEXT_CORE_PROFILE_BIT_ARB,
             0
         };
-        var context = GLEX.CreateContextAttribsARB(handleToDeviceContext, 0, gl33Attributes);
+        var context = GLEX.CreateContextAttribsARB(deviceContextHandle, 0, glAttributes);
         if (context == 0)
             throw null!;
 
-        if (!GL.MakeCurrent(handleToDeviceContext, context))
+        if (!GL.MakeCurrent(deviceContextHandle, context))
             throw null!;
 
-        if (Initialized is not null)
-        {
-            Initialized.Invoke();
-            Initialized = null;
-        }
-
+        Handle = context;
         return context;
     }
-
-    public void Dispose()
-    {
-        if (!GL.MakeCurrent(handleToDeviceContext, 0))
-            throw null!;
-
-        if (!GL.DeleteContext(WindowContextHandle))
-            throw null!;
-    }
-
-    static bool isOpenGLContextInitialized;
-
-    public static Action? Initialized;
 
     const int
         DRAW_TO_WINDOW_ARB = 0x2001,

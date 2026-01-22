@@ -14,6 +14,11 @@ public unsafe struct GlBuffer : IDisposable
         GL.BindBuffer(Type, ID);
     }
 
+    public void Allocate(int length)
+    {
+        Allocate(null, length);
+    }
+
     public void Allocate<T>(T data)
         where T : unmanaged
     {
@@ -43,7 +48,9 @@ public unsafe struct GlBuffer : IDisposable
         where T : unmanaged
     {
         fixed (T* dataPointer = data)
+        {
             Write(dataPointer, data.Length * sizeof(T));
+        }
     }
 
     public void Write(void* data, int length)
@@ -57,7 +64,9 @@ public unsafe struct GlBuffer : IDisposable
     {
         Bind();
         fixed (T* dataPointer = data)
+        {
             GL.BufferSubData(Type, offset, data.Length, dataPointer);
+        }
     }
 
     public void Write(void* data, int length, int offset)
@@ -76,6 +85,18 @@ public unsafe struct GlBuffer : IDisposable
     {
         var id = ID;
         GL.DeleteBuffers(1, &id);
+    }
+
+    public static GlBuffer From(uint id, BufferType type, BufferUsage usage)
+    {
+        var buffer = new GlBuffer
+        {
+            ID = id,
+            Type = type,
+            Usage = usage
+        };
+
+        return buffer;
     }
 
     public static GlBuffer Create(BufferType type, BufferUsage usage)
@@ -140,8 +161,12 @@ public unsafe struct GlBuffer : IDisposable
         var ids = stackalloc uint[buffers.Length];
         GL.GenerateBuffers((uint)count, ids);
         fixed (nint* buffersPointer = buffers)
+        {
             for (var index = 0; index < count; index++)
+            {
                 ((GlBuffer*)buffersPointer[index])->ID = ids[index];
+            }
+        }
     }
 
     public static void DisposeMultiple(ReadOnlySpan<GlBuffer> buffers)
@@ -149,8 +174,12 @@ public unsafe struct GlBuffer : IDisposable
         var count = buffers.Length;
         var ids = stackalloc uint[buffers.Length];
         fixed (GlBuffer* buffersPointer = buffers)
+        {
             for (var index = 0; index < count; index++)
+            {
                 ids[index] = buffersPointer[index].ID;
+            }
+        }
         GL.GenerateBuffers((uint)count, ids);
     }
 }
