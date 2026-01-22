@@ -1,32 +1,35 @@
 ﻿using Mossarium.Alpha.UI.OpenGL;
+using OpenGL;
 using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
 
 namespace Mossarium.Alpha.UI.Managers;
 
-public static class OpenGlManager
+public unsafe static class OpenGlManager
 {
-    static bool isInitialized;
-    public static void NotifyNewWindow(Window window)
+    static bool isInitialContextInitialized;
+    public static void InitializeWindowContext(Window window)
     {
-        if (isInitialized)
-            return;
-        isInitialized = true;
-
-        WindowGlContext.Initialize(window.DeviceContextHandle);
-        GlUniformBufferRegistry.Initialize();
-        GlslImpl.Initialize();
+        if (isInitialContextInitialized)
+        {
+            WindowGlContext.InitializeSlaveContext(window.DeviceContextHandle);
+        }
+        else
+        {
+            isInitialContextInitialized = true;
+            WindowGlContext.InitializeMasterContext(window.DeviceContextHandle);
+            GlUniformBufferRegistry.Initialize();
+            GlPrograms.Initialize();
+        }
     }
 
-
-    static nint activeHdc;
-    public static void SetActiveContext(Window window)
+    static nint currentDeviceContextHandle;
+    public static void MakeWindowCurrent(Window window)
     {
-        var hdc = window.DeviceContextHandle;
-        if (hdc == activeHdc)
+        var deviceContextHandle = window.DeviceContextHandle;
+        if (deviceContextHandle == currentDeviceContextHandle)
             return;
 
-        activeHdc = hdc;
-        GL.MakeCurrent(hdc, WindowGlContext.Handle);
+        currentDeviceContextHandle = deviceContextHandle;
+        GL.MakeCurrent(deviceContextHandle, WindowGlContext.ContextHandle);
     }
 }

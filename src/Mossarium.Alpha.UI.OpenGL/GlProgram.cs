@@ -1,11 +1,11 @@
-﻿using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
+﻿using OpenGL;
+using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-public unsafe struct GlslProgram : IDisposable
+public unsafe struct GlProgram : IDisposable
 {
-    public GlslProgram(params ReadOnlySpan<GlslShader> shaders)
+    public GlProgram(params ReadOnlySpan<GlShader> shaders)
     {
         var programId = GL.CreateProgram();
         for (var shaderIndex = 0; shaderIndex < shaders.Length; shaderIndex++)

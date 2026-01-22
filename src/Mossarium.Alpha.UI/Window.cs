@@ -2,9 +2,9 @@
 using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing;
 using Mossarium.Alpha.UI.Windowing.Structures;
+using OpenGL;
 using WindowsOS;
 using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
 
 namespace Mossarium.Alpha.UI;
 
@@ -26,7 +26,7 @@ public unsafe class Window : SystemWindow
     GlVertexArray<GlVertex, ushort> vertexArray;
     protected virtual void OnRender()
     {
-        OpenGlManager.SetActiveContext(this);
+        OpenGlManager.MakeWindowCurrent(this);
 
         var glslWindowData = new GlslubWindowData
         {
@@ -39,8 +39,8 @@ public unsafe class Window : SystemWindow
         GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
 
         GL.Clear(ClearMask.Color);
-            
-        GlslImpl.Program.AP.Use();
+        
+        GlPrograms.AP.Use();
 
         GL.Uniform(0, 160.0f, 120.0f);
         GL.Uniform(1, 150.0f, 120.0f);
@@ -53,7 +53,7 @@ public unsafe class Window : SystemWindow
 
     public new void Dispose()
     {
-        WindowManager.NotifyWindowDeleting(this);
+        WindowManager.FinalizeWindow(this);
         base.Dispose();
     }
 

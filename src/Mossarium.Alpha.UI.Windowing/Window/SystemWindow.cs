@@ -139,24 +139,24 @@ public unsafe abstract partial class SystemWindow : IDisposable
 
                     if (wParam is not SIZE_MAXHIDE and not SIZE_MAXSHOW)
                     {
-                        var size = Message.DecodeSize(lParam);
-                        Size = new SizeI4(size.Width, size.Height);
-                        OnSizeChanged(size.Width, size.Height);
+                        Message.DecodeSize(lParam, out var width, out var height);
+                        Size = new SizeI4(width, height);
+                        OnSizeChanged(width, height);
                     }
 
                     break;
                 }
             case WindowMessage.Move:
                 {
-                    var location = Message.DecodeLocation(lParam);
+                    Message.DecodeLocation(lParam, out var x, out var y);
 
-                    Location = new LocationI4(location.X, location.Y);
-                    OnLocationChanged(location.X, location.Y);
+                    Location = new LocationI4(x, y);
+                    OnLocationChanged(x, y);
                     break;
                 }
             case WindowMessage.KeyDown:
                 {
-                    var downKey = Message.DecodeDownKey(wParam, lParam);
+                    Message.DecodeDownKey(wParam, lParam, out var downKey);
                     var key = downKey.Key;
 
                     if (downKey.IsRepeat)
@@ -173,7 +173,7 @@ public unsafe abstract partial class SystemWindow : IDisposable
                 }
             case WindowMessage.KeyUp:
                 {
-                    var downKey = Message.DecodeDownKey(wParam, lParam);
+                    Message.DecodeDownKey(wParam, lParam, out var downKey);
                     var key = downKey.Key;
 
                     PressedKeyCollection.Insance.NotifyUnpress(key);

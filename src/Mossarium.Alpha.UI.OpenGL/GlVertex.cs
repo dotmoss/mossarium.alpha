@@ -1,6 +1,5 @@
 ﻿using Mossarium.Alpha.UI.Windowing.Structures;
 using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 

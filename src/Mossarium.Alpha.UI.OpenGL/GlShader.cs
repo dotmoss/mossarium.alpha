@@ -1,11 +1,11 @@
-﻿using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
+﻿using OpenGL;
+using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-public unsafe struct GlslShader : IDisposable
+public unsafe struct GlShader : IDisposable
 {
-    public GlslShader(ShaderType type, ReadOnlySpan<byte> sourceCode)
+    public GlShader(ShaderType type, ReadOnlySpan<byte> sourceCode)
     {
         var shaderId = GL.CreateShader(type);
         GL.ShaderSource(shaderId, sourceCode);

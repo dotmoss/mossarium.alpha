@@ -10,35 +10,11 @@ public struct Message
     public long Point;
     public int Private;
 
-    public static Location DecodeLocation(ulong lParam) => new Location(lParam);
+    public static void DecodeLocation(ulong lParam, out int x, out int y) => (x, y) = ((int)(lParam & 0xFFFF), (int)(lParam >> 16));
 
-    public struct Location
-    {
-        public Location(ulong lParam)
-        {
-            X = (int)(lParam & 0xFFFF);
-            Y = (int)(lParam >> 16);
-        }
+    public static void DecodeSize(ulong lParam, out int width, out int height) => (width, height) = ((int)(lParam & 0xFFFF), (int)(lParam >> 16));
 
-        public int X;
-        public int Y;
-    }
-
-    public static Size DecodeSize(ulong lParam) => new Size(lParam);
-
-    public struct Size
-    {
-        public Size(ulong lParam)
-        {
-            Width = (int)(lParam & 0xFFFF);
-            Height = (int)(lParam >> 16);
-        }
-
-        public int Width; 
-        public int Height;
-    }
-
-    public static DownKey DecodeDownKey(ulong wParam, ulong lParam) => new DownKey(wParam, lParam);
+    public static void DecodeDownKey(ulong wParam, ulong lParam, out DownKey key) => key = new DownKey(wParam, lParam);
 
     public struct DownKey
     {
@@ -53,22 +29,21 @@ public struct Message
 
         public Keys Key => key;
 
-        public bool IsExtended => (state & KeyDownState.EXTENDED) != 0;
-        public bool IsDlgMode => (state & KeyDownState.DLGMODE) != 0;
-        public bool IsMenuMode => (state & KeyDownState.MENUMODE) != 0;
-        public bool IsAltDown => (state & KeyDownState.ALTDOWN) != 0;
-        public bool IsRepeat => (state & KeyDownState.REPEAT) != 0;
-        public bool IsUp => (state & KeyDownState.UP) != 0;
-    }
+        public bool IsExtended => (state & KeyDownState.Extended) > 0;
+        public bool IsDlgMode => (state & KeyDownState.DialogMode) > 0;
+        public bool IsMenuMode => (state & KeyDownState.MenuMode) > 0;
+        public bool IsAltDown => (state & KeyDownState.AltDown) > 0;
+        public bool IsRepeat => (state & KeyDownState.Repeat) > 0;
+        public bool IsUp => (state & KeyDownState.Up) > 0;
 
-    [Flags]
-    enum KeyDownState
-    {
-        EXTENDED = 0x0100,
-        DLGMODE = 0x0800,
-        MENUMODE = 0x1000,
-        ALTDOWN = 0x2000,
-        REPEAT = 0x4000,
-        UP = 0x8000
+        enum KeyDownState
+        {
+            Extended = 0x0100,
+            DialogMode = 0x0800,
+            MenuMode = 0x1000,
+            AltDown = 0x2000,
+            Repeat = 0x4000,
+            Up = 0x8000
+        }
     }
 };

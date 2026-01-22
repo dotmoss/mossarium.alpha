@@ -6,9 +6,27 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public unsafe static class WindowGlContext
 {
-    public static nint Handle;
+    public static nint ContextHandle;
 
-    public static nint Initialize(nint deviceContextHandle)
+    public static void InitializeSlaveContext(nint deviceContextHandle)
+    {
+        var pixelFormatDescriptor = new PixelFormatDescriptor
+        {
+            Size = (short)sizeof(PixelFormatDescriptor),
+            Version = 1,
+            PixelType = PixelTypeEnum.RGBA,
+            Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
+            ColorBits = 24,
+            AlphaBits = 0,
+            LayerType = LayerTypeEnum.MainPlane,
+            DepthBits = 0,
+            StencilBits = 0
+        };
+        var pixelFormat = GDI32.ChoosePixelFormat(deviceContextHandle, &pixelFormatDescriptor);
+        GDI32.SetPixelFormat(deviceContextHandle, pixelFormat, &pixelFormatDescriptor);
+    }
+
+    public static nint InitializeMasterContext(nint deviceContextHandle)
     {
         var pixelFormatDescriptor = new PixelFormatDescriptor
         {
@@ -36,7 +54,7 @@ public unsafe static class WindowGlContext
         if (!GL.MakeCurrent(deviceContextHandle, tempContext))
             throw null!;
 
-        GLEX.InititalizeContextFunctions();
+        GL.InititalizeContextFunctions();
 
         if (!GL.MakeCurrent(deviceContextHandle, 0))
             throw null!;
@@ -59,7 +77,7 @@ public unsafe static class WindowGlContext
         var fAttributes = stackalloc float[0];
         int formats;
         uint numFormats;
-        if (!GLEX.ChoosePixelFormatARB(deviceContextHandle, iAttributes, fAttributes, 1, &formats, &numFormats))
+        if (!GL.ChoosePixelFormatARB(deviceContextHandle, iAttributes, fAttributes, 1, &formats, &numFormats))
             throw null!;
 
         var glAttributes = stackalloc int[]
@@ -69,14 +87,14 @@ public unsafe static class WindowGlContext
             CONTEXT_PROFILE_MASK_ARB,  CONTEXT_CORE_PROFILE_BIT_ARB,
             0
         };
-        var context = GLEX.CreateContextAttribsARB(deviceContextHandle, 0, glAttributes);
+        var context = GL.CreateContextAttribsARB(deviceContextHandle, 0, glAttributes);
         if (context == 0)
             throw null!;
 
         if (!GL.MakeCurrent(deviceContextHandle, context))
             throw null!;
 
-        Handle = context;
+        ContextHandle = context;
         return context;
     }
 

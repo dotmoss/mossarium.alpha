@@ -1,13 +1,27 @@
 ﻿using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-public static class GlslImpl
+public static class GlPrograms
 {
+    public static GlProgram GradientRgbTriangles, AP;
+
+    public static class Shader
+    {
+        public static class Vertex
+        {
+            public static GlShader GradientRgbTriangles, AV;
+        }
+
+        public static class Fragment
+        {
+            public static GlShader RgbToRgba, AF;
+        }
+    }
+
     public static void Initialize()
     {
-        Shader.Vertex.GradientRgbTriangles = new GlslShader(ShaderType.Vertex,
+        Shader.Vertex.GradientRgbTriangles = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -32,7 +46,7 @@ void main()
     fragColor = inColor;
 }"u8);
 
-        Shader.Fragment.RgbToRgba = new GlslShader(ShaderType.Fragment,
+        Shader.Fragment.RgbToRgba = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
 in vec3 fragColor;
@@ -44,12 +58,12 @@ void main()
     FragColor = vec4(fragColor, 1.0);
 }"u8);
 
-        Program.GradientRgbTriangles = new GlslProgram(
+        GradientRgbTriangles = new GlProgram(
             Shader.Vertex.GradientRgbTriangles,
             Shader.Fragment.RgbToRgba
         );
 
-        Shader.Vertex.AV = new GlslShader(ShaderType.Vertex,
+        Shader.Vertex.AV = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -73,7 +87,7 @@ void main()
     );
 }"u8);
 
-        Shader.Fragment.AF = new GlslShader(ShaderType.Fragment,
+        Shader.Fragment.AF = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
 layout (location = 0) uniform vec2 inPosition;
@@ -100,27 +114,9 @@ void main()
     color = vec4(inColor, smoothedAlpha);
 }"u8);
 
-        Program.AP = new GlslProgram(
+        AP = new GlProgram(
             Shader.Vertex.AV,
             Shader.Fragment.AF
         );
-    }
-
-    public static class Shader
-    {
-        public static class Vertex
-        {
-            public static GlslShader GradientRgbTriangles, AV;
-        }
-
-        public static class Fragment
-        {
-            public static GlslShader RgbToRgba, AF;
-        }
-    }
-
-    public static class Program
-    {
-        public static GlslProgram GradientRgbTriangles, AP;
     }
 }

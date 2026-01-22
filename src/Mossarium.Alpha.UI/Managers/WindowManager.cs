@@ -20,12 +20,12 @@ public static unsafe class WindowManager
         }
     }
 
-    public static void TransferUIThreadControl()
+    public static void TransferThreadControlToUI()
     {
-        StartLoop();
+        UIThreadBody();
     }
 
-    static void StartLoop()
+    static void UIThreadBody()
     {
         Thread.CurrentThread.Name = "UI Thread";
 
@@ -97,27 +97,19 @@ public static unsafe class WindowManager
         }
     }
 
-    static void NotifyWindowAdding(Window window)
-    {
-        windows.Add(window);
-        OpenGlManager.NotifyNewWindow(window);
-    }
-
-    public static void NotifyWindowDeleting(Window window)
-    {
-        windows.Remove(window);
-        staticWindows.Remove(window);
-    }
-
     public static void InitializeWindow(Window window)
     {
-        ThreadManager.EnsureUIThread();
-
-        var windowPointer = staticWindows.Add(window);
-        NotifyWindowAdding(window);
+        var windowPointer = staticWindows.GetWindowAddress(window);
+        windows.Add(window);
         User32.SetWindowLongPtr(window.Handle, WindowLongField.UserData, windowPointer);
         User32.SetWindowWndProcFunction(window.Handle, (nint)(delegate* unmanaged<nint, WindowMessage, ulong, ulong, long>)&WndProc);
+        OpenGlManager.InitializeWindowContext(window);
         Window.Dispatcher.OnRendererInitialized(window);
+    }
+
+    public static void FinalizeWindow(Window window)
+    {
+        windows.Remove(window);
     }
 
     [UnmanagedCallersOnly]
@@ -134,6 +126,11 @@ public static unsafe class WindowManager
             var privateData = window.PrivateWindowManagerData;
             privateData.MessageCounter++;
             window.PrivateWindowManagerData = privateData;
+        }
+
+        if (message is WindowMessage.Close)
+        {
+            Unsafe.AsRef<Window?>((void*)windowAddress) = null;
         }
 
         if (SystemWindow.Dispatcher.OnMessage(window, hWnd, message, wParam, lParam))
@@ -156,7 +153,7 @@ public static unsafe class WindowManager
     {
         Window window1, window2, window3, window4, window5, window6, window7, window8, window9, window10, window11, window12, window13, window14, window15, window16;
 
-        public nint Add(Window window)
+        public nint GetWindowAddress(Window window)
         {
             ref Window array = ref Unsafe.As<StaticWindowArray, Window>(ref this);
             for (var i = 0U; i < 16; i++)
@@ -166,22 +163,6 @@ public static unsafe class WindowManager
                     ref Window windowAtIndex = ref Unsafe.Add(ref array, i);
                     windowAtIndex = window;
                     return (nint)Unsafe.AsPointer(ref windowAtIndex);
-                }
-            }
-
-            throw null!;
-        }
-
-        public void Remove(Window window)
-        {
-            var array = this;
-            var pointer = (Window*)&array;
-            for (var i = 0U; i < 16; i++)
-            {
-                if (pointer[i] == window)
-                {
-                    pointer[i] = null;
-                    return;
                 }
             }
 

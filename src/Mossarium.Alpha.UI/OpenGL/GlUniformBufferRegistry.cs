@@ -1,7 +1,7 @@
 ﻿using Mossarium.Alpha.UI.Windowing.Structures;
+using OpenGL;
 using System.Runtime.InteropServices;
 using static OpenGL.Enums;
-using GL = OpenGL.GLEX;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 

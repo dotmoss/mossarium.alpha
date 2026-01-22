@@ -11,14 +11,12 @@ unsafe class Program
 {
     static void Main()
     {
-        ThreadManager.VisitAsMainThread();
-
         var window = new ApplicationWindow();
 
         WindowManager.InitializeWindow(window);
         window.Visible = true;
 
-        WindowManager.TransferUIThreadControl();
+        WindowManager.TransferThreadControlToUI();
     }
 }
 

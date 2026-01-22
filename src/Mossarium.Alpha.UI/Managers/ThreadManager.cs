@@ -10,6 +10,11 @@ public unsafe static class ThreadManager
     public static readonly Win32BlockingCollection<Action> ConsumerJobs = new Win32BlockingCollection<Action>();
     public static readonly Win32BlockingCollection<CancelableAction> ConsumerCancelableJobs = new Win32BlockingCollection<CancelableAction>();
 
+    static ThreadManager()
+    {
+        StartNew("Consumer Thread", ConsumerThreadBody, 256);
+    }
+
     public static void StartNew(string name, Action entryPoint, uint stackKbSize)
     {
         var start = new ThreadStart(entryPoint);
@@ -22,33 +27,7 @@ public unsafe static class ThreadManager
         thread.Start();
     }
 
-#if DEBUG
-    static int MainThreadID;
-#endif
-    public static void VisitAsMainThread()
-    {
-#if DEBUG
-        MainThreadID = Kernel32.GetCurrentThreadId();
-#endif
-
-        StartConsumerThread();
-    }
-
-    public static void EnsureUIThread()
-    {
-#if DEBUG
-        var thredId = Kernel32.GetCurrentThreadId();
-        if (thredId != MainThreadID)
-            throw null!;
-#endif
-    }
-
-    static void StartConsumerThread()
-    {
-        StartNew("Consumer Thread", ConsumerBody, 256);
-    }
-
-    static void ConsumerBody()
+    static void ConsumerThreadBody()
     {
         var handles = stackalloc nint[2];
 
