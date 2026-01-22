@@ -2,24 +2,24 @@
 
 namespace WindowsOS;
 
-public unsafe static class User32
+public unsafe static partial class User32
 {
     const string user = "user32";
 
     #region DllImports
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int GetWindowLongW(nint hWnd, int nIndex);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         int SetWindowLongW(nint hWnd, int nIndex, int dwNewLong);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         long GetWindowLongPtrW(nint hWnd, int nIndex);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         long SetWindowLongPtrW(nint hWnd, int nIndex, long dwNewLong);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         nint CreateWindowExW(
             int dwExStyle, 
             char* lpClassName, 
@@ -35,58 +35,58 @@ public unsafe static class User32
             nint lpParam
         );
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int GetWindowTextW(nint hWnd, char* lpString, int nMaxCount);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int SetWindowTextW(nint hWnd, char* lpString);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         int SetWindowPos(nint hWnd, nint hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         int GetWindowRect(nint hWnd, int* pRect);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         long CallWindowProcW(void* wndFunc, nint hWnd, uint msg, ulong wParam, ulong lParam);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         long DefWindowProcW(nint hWnd, uint msg, ulong wParam, ulong lParam);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [LibraryImport(user), SuppressGCTransition] public static partial
         nint GetDC(nint hWnd);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int ReleaseDC(nint hWnd, nint hDC);
 
-    [DllImport(user)] public static extern
+    [LibraryImport(user)] public static partial
         int DestroyWindow(nint hWnd);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         int GetMessageW(Message* pMsg, nint hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int TranslateMessage(Message* pMsg);
 
-    [DllImport(user)] public static extern 
-        int DispatchMessage(Message* pMsg);
+    [LibraryImport(user)] public static partial
+        int DispatchMessageW(Message* pMsg);
 
-    [DllImport(user)] public static extern
+    [LibraryImport(user)] public static partial
         int PeekMessageW(Message* pMsg, nint hWnd, uint wMsgFilterMin, uint wMsgFilterMax, uint wRemoveMsg);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int MessageBoxA(nint hWnd, byte* lpText, byte* lpCaption, uint uType);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int MessageBoxW(nint hWnd, char* lpText, char* lpCaption, uint uType);
 
-    [DllImport(user), SuppressGCTransition] public static extern 
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int GetSystemMetrics(int nIndex);
 
-    [DllImport(user)] public static extern 
+    [LibraryImport(user)] public static partial
         int SetLayeredWindowAttributes(nint hwnd, int colorRef, byte alpha, int flags);
 
-    [DllImport(user), SuppressGCTransition] public static extern
+    [LibraryImport(user), SuppressGCTransition] public static partial
         int MsgWaitForMultipleObjectsEx(int nCount, nint* pHandles, uint dwMilliseconds, QueueStatus dwWakeMask, MessageWMO dwFlags);
     #endregion
 

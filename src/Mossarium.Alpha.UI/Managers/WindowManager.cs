@@ -91,7 +91,7 @@ public static unsafe class WindowManager
                 while (User32.PeekMessage(&message, IntPtr.Zero, 0, 0, PM_REMOVE) > 0)
                 {
                     User32.TranslateMessage(&message);
-                    User32.DispatchMessage(&message);
+                    User32.DispatchMessageW(&message);
                 }
             }
         }

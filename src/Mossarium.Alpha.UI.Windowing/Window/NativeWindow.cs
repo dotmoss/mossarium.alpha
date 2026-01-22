@@ -59,14 +59,6 @@ public unsafe struct NativeWindow : IDisposable
 
     public WindowExStyles ExStyle { get => User32.GetWindowExStyle(Handle); set => User32.SetWindowExStyle(Handle, value); }
 
-    public bool PeekMessage(Message* message) => User32.PeekMessage(message, Handle, 0, 0, removeMessage: 1) != 0;
-
-    public bool GetMessage(Message* message) => User32.GetMessage(message, Handle, 0, 0) != 0;
-
-    public bool TranslateMessage(Message* message) => User32.TranslateMessage(message) != 0;
-
-    public bool DispatchMessage(Message* message) => User32.DispatchMessage(message) != 0;
-
     public void Dispose()
     {
         User32.ReleaseDC(Handle, HDC);

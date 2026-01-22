@@ -4,7 +4,7 @@ public unsafe struct HighAccuracyWaitableTimer : IDisposable
 {
     public HighAccuracyWaitableTimer()
     {
-        Handle = Kernel32.CreateWaitableTimer(default/*2: unsupported*/, true, null);
+        Handle = Kernel32.CreateWaitableTimerW(default/*2: unsupported*/, true, null);
     }
 
     public readonly nint Handle;

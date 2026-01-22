@@ -2,24 +2,26 @@
 
 namespace WindowsOS;
 
-public static unsafe class GDI32
+public static unsafe partial class GDI32
 {
     const string gdi = "gdi32";
 
     #region DllImports
-    [DllImport(gdi), SuppressGCTransition] public static extern
+    [LibraryImport(gdi), SuppressGCTransition] public static partial
         nint GetStockObject(StockObjects fnObject);
 
-    [DllImport(gdi), SuppressGCTransition] public static extern
+    [LibraryImport(gdi), SuppressGCTransition] public static partial
         int ChoosePixelFormat(nint hdc, PixelFormatDescriptor* ppfd);
 
-    [DllImport(gdi), SuppressGCTransition] public static extern
+    [LibraryImport(gdi), SuppressGCTransition] public static partial
         int DescribePixelFormat(nint hdc, int pixelFormat, uint bytes, PixelFormatDescriptor* ppfd);
 
-    [DllImport(gdi), SuppressGCTransition] public static extern
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gdi), SuppressGCTransition] public static partial
         bool SetPixelFormat(nint hdc, int format, PixelFormatDescriptor* ppfd);
 
-    [DllImport(gdi), SuppressGCTransition] public static extern
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gdi), SuppressGCTransition] public static partial
         bool SwapBuffers(nint hdc);
     #endregion
 }

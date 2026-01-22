@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
+	<DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
   </PropertyGroup>
 
 </Project>

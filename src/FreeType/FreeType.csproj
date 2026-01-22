@@ -7,6 +7,7 @@
     <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<AssemblyName>ManagedFreeType</AssemblyName>
+	<DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
   </PropertyGroup>
 
   <ItemGroup>

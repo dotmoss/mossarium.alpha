@@ -1,29 +1,29 @@
 ﻿using System.Runtime.InteropServices;
 
-public unsafe static class FreeType
+public unsafe static partial class FreeType
 {
     const string freetype = "freetype";
 
     #region DllImports
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Init_FreeType(FT_Library* library);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_New_Face(FT_Library library, byte* pathname, uint face_index, FT_Face* aface);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Set_Pixel_Sizes(FT_Face face, uint pixel_width, uint pixel_height);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Load_Glyph(FT_Face face, uint glyph_index, int loadFlags);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Get_Glyph_Name(FT_Face face, uint glyph_index, void* buffer, uint buffer_max);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Done_Face(FT_Face face);
 
-    [DllImport(freetype), SuppressGCTransition] public static extern
+    [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Done_FreeType(FT_Library library);
     #endregion
 

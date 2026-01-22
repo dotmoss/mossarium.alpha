@@ -2,57 +2,88 @@
 
 namespace WindowsOS;
 
-public unsafe class Kernel32
+public unsafe partial class Kernel32
 {
     const string kernel = "kernel32";
 
     #region DllImports
-    [DllImport(kernel), SuppressGCTransition] public static extern
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         nint GetModuleHandleA(byte* name);
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         nint GetProcAddress(nint module, byte* name);
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         nint LoadLibraryA(byte* dllPath);
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         int GetCurrentThreadId();
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
-        nint CreateWaitableTimer(
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
+        nint CreateWaitableTimerW(
             nint lpTimerAttributes,
+            [MarshalAs(UnmanagedType.Bool)]
             bool bManualReset,
-            char* lpTimerName);
+            char* lpTimerName
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         bool SetWaitableTimer(
             nint hTimer,
             long* pDueTime,
             int lPeriod,
             nint pfnCompletionRoutine,
             nint lpArgToCompletionRoutine,
-            bool fResume);
+            [MarshalAs(UnmanagedType.Bool)]
+            bool fResume
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         int CloseHandle(nint hObject);
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         uint WaitForSingleObject(nint hHandle, uint dwMilliseconds);
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
-        uint WaitForSingleObjectEx(nint hHandle, uint dwMilliseconds, bool bAlertable);
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
+        uint WaitForSingleObjectEx(
+            nint hHandle, 
+            uint dwMilliseconds,
+            [MarshalAs(UnmanagedType.Bool)]
+            bool bAlertable
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
-        int WaitForMultipleObjects(int nCount, nint* lpHandles, bool bWaitAll, uint dwMilliseconds);
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
+        int WaitForMultipleObjects(
+            int nCount, 
+            nint* lpHandles, 
+            [MarshalAs(UnmanagedType.Bool)] 
+            bool bWaitAll, 
+            uint dwMilliseconds
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern
-        int WaitForMultipleObjectsEx(int nCount, nint* lpHandles, bool bWaitAll, uint dwMilliseconds, bool bAlertable);
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
+        int WaitForMultipleObjectsEx(
+            int nCount, 
+            nint* lpHandles, 
+            [MarshalAs(UnmanagedType.Bool)] 
+            bool bWaitAll, 
+            uint dwMilliseconds, 
+            [MarshalAs(UnmanagedType.Bool)] 
+            bool bAlertable
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
-        nint CreateEventA(nint lpEventAttributes, bool bManualReset, bool bInitialState, byte* lpName);
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
+        nint CreateEventA(
+            nint lpEventAttributes, 
+            [MarshalAs(UnmanagedType.Bool)] 
+            bool bManualReset, 
+            [MarshalAs(UnmanagedType.Bool)] 
+            bool bInitialState, 
+            byte* lpName
+        );
 
-    [DllImport(kernel), SuppressGCTransition] public static extern 
+    [LibraryImport(kernel), SuppressGCTransition] public static partial
         int SetEvent(nint hEvent);
     #endregion
 
@@ -70,5 +101,5 @@ public unsafe class Kernel32
 
     public static uint WaitForSingleObject(nint handle) => WaitForSingleObject(handle, 0xFFFFFFFF);
 
-    public static uint WaitForSingleObjectEx(nint handle, bool alertable) => WaitForSingleObjectEx(handle, 0xFFFFFFFF, alertable);
+    public static uint WaitForSingleObjectEx(nint handle, [MarshalAs(UnmanagedType.Bool)] bool alertable) => WaitForSingleObjectEx(handle, 0xFFFFFFFF, alertable);
 }
