@@ -1,0 +1,5 @@
+﻿enum ProfileStage
+{
+    GlWindowGlobalContextInitialization,
+    GlWindowLocalContextInitialization
+}

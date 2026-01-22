@@ -1,4 +1,5 @@
 ﻿using Mossarium.Alpha.UI.Windowing;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using WindowsOS;
@@ -53,7 +54,9 @@ public static unsafe class WindowManager
 
             if (result == TimerIndex)
             {
+#if !UI_Unlimited_FPS
                 frameTimer.ResetTimer(160000);
+#endif
 
                 for (var i = 0; i < windows.Count; i++)
                 {
@@ -62,8 +65,10 @@ public static unsafe class WindowManager
                     var privateData = window.PrivateWindowManagerData;
                     if (privateData.MessageCounter == privateData.LastFrameMessageCounter)
                     {
+#if !UI_Unlimited_FPS
                         if (privateData.FramesWithNoMessage > 1000)
                             continue;
+#endif
 
                         privateData.FramesWithNoMessage++;
                     }
@@ -151,22 +156,33 @@ public static unsafe class WindowManager
 
     struct StaticWindowArray
     {
-        Window window1, window2, window3, window4, window5, window6, window7, window8, window9, window10, window11, window12, window13, window14, window15, window16;
+        Window window1, window2, window3, window4, 
+               window5, window6, window7, window8,
+               window9, window10, window11, window12, 
+               window13, window14, window15, window16;
 
-        public nint GetWindowAddress(Window window)
+        public nint GetWindowAddress(Window forWindow)
         {
-            ref Window array = ref Unsafe.As<StaticWindowArray, Window>(ref this);
+            ref Window windows = ref Unsafe.As<StaticWindowArray, Window>(ref this);
             for (var i = 0U; i < 16; i++)
             {
-                if (Unsafe.Add(ref array, i) == null)
-                {
-                    ref Window windowAtIndex = ref Unsafe.Add(ref array, i);
-                    windowAtIndex = window;
-                    return (nint)Unsafe.AsPointer(ref windowAtIndex);
-                }
+                ref Window window = ref Unsafe.Add(ref windows, i);
+                if (window is null)
+                    window = forWindow;
+                else if (window != forWindow)
+                    continue;
+
+                return (nint)Unsafe.AsPointer(ref window);
             }
 
-            throw null!;
+            Window[] referencesForAot = 
+            [
+                window1, window2, window3, window4, 
+                window5, window6, window7, window8, 
+                window9, window10, window11, window12,
+                window13, window14, window15, window16
+            ];
+            throw new Exception(referencesForAot.ToString());
         }
     }
 }

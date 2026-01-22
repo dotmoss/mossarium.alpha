@@ -1,4 +1,5 @@
-﻿using OpenGL;
+﻿using DebugProfiler;
+using OpenGL;
 using WindowsOS;
 using static WindowsOS.PixelFormatDescriptor;
 
@@ -6,21 +7,30 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public unsafe static class WindowGlContext
 {
+    static WindowGlContext()
+    {
+        Profiler.Register<ProfileStage>("OpenGL");
+    }
+
     public static nint ContextHandle;
     public static void InitializeContext(nint deviceContextHandle)
     {
+        if (ContextHandle == 0)
+            Profiler.Push(ProfileStage.GlWindowGlobalContextInitialization);
+        else Profiler.Push(ProfileStage.GlWindowLocalContextInitialization);
+
         var pixelFormatDescriptor = new PixelFormatDescriptor
-        {
-            Size = (short)sizeof(PixelFormatDescriptor),
-            Version = 1,
-            PixelType = PixelTypeEnum.RGBA,
-            Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
-            ColorBits = 24,
-            AlphaBits = 0,
-            LayerType = LayerTypeEnum.MainPlane,
-            DepthBits = 0,
-            StencilBits = 0
-        };
+            {
+                Size = (short)sizeof(PixelFormatDescriptor),
+                Version = 1,
+                PixelType = PixelTypeEnum.RGBA,
+                Flags = FlagsEnum.DrawToWindow | FlagsEnum.SupportOpenGL | FlagsEnum.DoubleBuffer,
+                ColorBits = 24,
+                AlphaBits = 0,
+                LayerType = LayerTypeEnum.MainPlane,
+                DepthBits = 0,
+                StencilBits = 0
+            };
         var pixelFormat = GDI32.ChoosePixelFormat(deviceContextHandle, &pixelFormatDescriptor);
         if (pixelFormat == 0)
             throw null!;
@@ -29,7 +39,10 @@ public unsafe static class WindowGlContext
             throw null!;
 
         if (ContextHandle != 0)
+        {
+            Profiler.Pop();
             return;
+        }
 
         var tempContext = GL.CreateContext(deviceContextHandle);
         if (tempContext == 0)
@@ -79,6 +92,7 @@ public unsafe static class WindowGlContext
             throw null!;
 
         ContextHandle = context;
+        Profiler.Pop();
     }
 
     const int

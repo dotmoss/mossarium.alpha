@@ -48,7 +48,7 @@ public unsafe static partial class User32
         int GetWindowRect(nint hWnd, int* pRect);
 
     [LibraryImport(user)] public static partial
-        long CallWindowProcW(void* wndFunc, nint hWnd, uint msg, ulong wParam, ulong lParam);
+        long CallWindowProcW(void* wndFunc, nint hWnd, WindowMessage msg, ulong wParam, ulong lParam);
 
     [LibraryImport(user)] public static partial
         long DefWindowProcW(nint hWnd, uint msg, ulong wParam, ulong lParam);
@@ -65,6 +65,9 @@ public unsafe static partial class User32
     [LibraryImport(user)] public static partial
         int GetMessageW(Message* pMsg, nint hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
 
+    [LibraryImport(user)] public static partial
+        int SendMessageW(nint hWnd, WindowMessage msg, ulong wParam, ulong lParam);
+
     [LibraryImport(user), SuppressGCTransition] public static partial
         int TranslateMessage(Message* pMsg);
 
@@ -79,6 +82,9 @@ public unsafe static partial class User32
 
     [LibraryImport(user), SuppressGCTransition] public static partial
         int MessageBoxW(nint hWnd, char* lpText, char* lpCaption, uint uType);
+
+    [LibraryImport(user)] public static partial
+        int ClipCursor(int* rectangle);
 
     [LibraryImport(user), SuppressGCTransition] public static partial
         int GetSystemMetrics(int nIndex);
@@ -180,7 +186,7 @@ public unsafe static partial class User32
     public static nint SetWindowWndProcFunction(nint handle, nint pointer) => (nint)SetWindowLongPtr(handle, WindowLongField.WndProc, pointer);
 
     public static long CallWindowProccess(nint handle, nint function, WindowMessage message, ulong wParam, ulong lParam)
-        => CallWindowProcW((void*)function, handle, (uint)message, wParam, lParam);
+        => CallWindowProcW((void*)function, handle, message, wParam, lParam);
 
     public static long CallDefaultWindowProccess(nint handle, WindowMessage message, ulong wParam, ulong lParam)
         => DefWindowProcW(handle, (uint)message, wParam, lParam);

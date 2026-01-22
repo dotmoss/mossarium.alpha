@@ -1,4 +1,5 @@
-﻿using Mossarium.Alpha.UI.Managers;
+﻿using DebugProfiler;
+using Mossarium.Alpha.UI.Managers;
 using Mossarium.Alpha.Windows;
 
 namespace Mossarium.Alpha;
@@ -12,14 +13,21 @@ unsafe class Program
 {
     static void Main()
     {
+        Profiler.Register<ProfileStage>("Application");
+        Profiler.Push(ProfileStage.UIInitialization);
+
         var window = new ApplicationWindow();
 
         WindowManager.InitializeWindow(window);
         window.Visible = true;
 
-        WindowManager.TransferThreadControlToUI();
+        Profiler.Pop();
+        Profiler.ShowProfiledData();
+
+        WindowManager.TransferThreadControlToUI();        
     }
 }
 
 // DEFINES
+// Define_Enable_Debug_Profiler
 // Define_UI_Unlimited_FPS

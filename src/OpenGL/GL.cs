@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using DebugProfiler;
+using System.Runtime.InteropServices;
 using WindowsOS;
 using static OpenGL.Enums;
 
@@ -8,6 +9,9 @@ public unsafe static class GL
 {
     public static void InititalizeContextFunctions()
     {
+        Profiler.Register<ProfileStage>("OpenGL");
+        Profiler.Push(ProfileStage.InititalizeContextFunctions);
+
         wglCreateContextAttribsARB = (delegate* unmanaged[SuppressGCTransition]<nint, nint, int*, nint>)GetProcAddress("wglCreateContextAttribsARB"u8);
         wglChoosePixelFormatARB = (delegate* unmanaged[SuppressGCTransition]<nint, int*, float*, uint, int*, uint*, bool>)GetProcAddress("wglChoosePixelFormatARB"u8);
         glCreateShader = (delegate* unmanaged[SuppressGCTransition]<ShaderType, uint>)GetProcAddress("glCreateShader"u8);
@@ -38,6 +42,8 @@ public unsafe static class GL
         glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
         glPushDebugGroup = (delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void>)GetProcAddress("glPushDebugGroup"u8);
         glPopDebugGroup = (delegate* unmanaged[SuppressGCTransition]<void>)GetProcAddress("glPopDebugGroup"u8);
+
+        Profiler.Pop();
 
         nint GetProcAddress(ReadOnlySpan<byte> name)
         {

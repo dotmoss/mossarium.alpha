@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
     <ProjectReference Include="..\WindowsOS\WindowsOS.csproj" />
   </ItemGroup>
 

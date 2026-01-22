@@ -1,4 +1,5 @@
-﻿using Mossarium.Alpha.UI.Windowing.Structures;
+﻿using DebugProfiler;
+using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
 using System.Runtime.InteropServices;
 
@@ -10,11 +11,15 @@ public static unsafe class GlUniformBufferRegistry
     {
         const int Count = 2;
 
+        Profiler.Push(ProfileStage.GlBuffersRegistration);
+
         var buffers = stackalloc uint[Count];
         GL.GenerateBuffers(Count, buffers);
 
         WindowData = new GlUniformBuffer<UbWindowData>(buffers[0]);
         RoundedRectangleData = new GlUniformBuffer<UbRoundedRectangleData>(buffers[1]);
+
+        Profiler.Pop();
     }
 
     public static GlUniformBuffer<UbWindowData> WindowData;
@@ -37,11 +42,11 @@ public struct UbWindowData
     }
 }
 
-[StructLayout(LayoutKind.Explicit, Size = 48)]
+[StructLayout(LayoutKind.Explicit, Size = 32)]
 public struct UbRoundedRectangleData
 {
-    [FieldOffset(0x00)] public LocationF4 Position;
-    [FieldOffset(0x08)] public SizeF4 Size;
-    [FieldOffset(0x10)] public RgbF4 Color;
-    [FieldOffset(0x20)] public float CornerRadius;
+    [FieldOffset(0x00)] public RgbF4 Color;
+    [FieldOffset(0x0C)] public float CornerRadius;
+    [FieldOffset(0x10)] public LocationF4 Position;
+    [FieldOffset(0x18)] public SizeF4 Size;
 }

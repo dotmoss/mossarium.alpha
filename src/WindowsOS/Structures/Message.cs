@@ -10,9 +10,9 @@ public struct Message
     public long Point;
     public int Private;
 
-    public static void DecodeLocation(ulong lParam, out int x, out int y) => (x, y) = ((int)(lParam & 0xFFFF), (int)(lParam >> 16));
+    public static void DecodeLocation(ulong lParam, out int x, out int y) => (x, y) = ((short)(lParam & 0xFFFF), (short)(lParam >> 16));
 
-    public static void DecodeSize(ulong lParam, out int width, out int height) => (width, height) = ((int)(lParam & 0xFFFF), (int)(lParam >> 16));
+    public static void DecodeSize(ulong lParam, out int width, out int height) => (width, height) = ((short)(lParam & 0xFFFF), (short)(lParam >> 16));
 
     public static void DecodeDownKey(ulong wParam, ulong lParam, out DownKey key) => key = new DownKey(wParam, lParam);
 

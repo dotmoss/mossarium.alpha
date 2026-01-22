@@ -19,6 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="pub\**" />
+    <EmbeddedResource Remove="pub\**" />
+    <None Remove="pub\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
     <ProjectReference Include="..\FreeType\FreeType.csproj" />
     <ProjectReference Include="..\HarfBuzz\HarfBuzz.csproj" />
     <ProjectReference Include="..\Mossarium.Alpha.UI\Mossarium.Alpha.UI.csproj" />

@@ -1,5 +1,5 @@
-﻿using Mossarium.Alpha.UI.Windowing.Structures;
-using System.Runtime.CompilerServices;
+﻿using DebugProfiler;
+using Mossarium.Alpha.UI.Windowing.Structures;
 using WindowsOS;
 
 namespace Mossarium.Alpha.UI.Windowing;
@@ -8,6 +8,7 @@ public unsafe abstract partial class SystemWindow : IDisposable
 {
     public SystemWindow(string title, LocationI4 location, SizeI4 size, WindowInitialAttributes attributes)
     {
+        Profiler.Push(ProfileStage.WindowCreation);
         NativeWindow = NativeWindow.Create(title, location, size);
 
         var styles = WindowStyles.Overlapped;
@@ -26,6 +27,7 @@ public unsafe abstract partial class SystemWindow : IDisposable
             styles |= WindowStyles.Maximize;
 
         Style = styles;
+        Profiler.Pop();
     }
 
     NativeWindow nativeWindow;
@@ -52,7 +54,7 @@ public unsafe abstract partial class SystemWindow : IDisposable
     public string Title { get => nativeWindow.Title; set => nativeWindow.Title = value; }
 
     public RectangleI4 Rectangle
-    { 
+    {
         get => cachedRectangle; 
         set => nativeWindow.Rectangle = value;
     }
@@ -125,6 +127,11 @@ public unsafe abstract partial class SystemWindow : IDisposable
     public nint Handle => nativeWindow.Handle;
 
     public nint DeviceContextHandle => nativeWindow.HDC;
+
+    protected void SendMessage(WindowMessage message, ulong wParam, ulong lParam)
+    {
+        User32.SendMessageW(Handle, message, wParam, lParam);
+    }
 
     protected virtual bool OnMessage(nint hWnd, WindowMessage message, ulong wParam, ulong lParam)
     {
@@ -276,6 +283,11 @@ public unsafe abstract partial class SystemWindow : IDisposable
     public void Dispose()
     {
         nativeWindow.Dispose();
+    }
+
+    static SystemWindow()
+    {
+        Profiler.Register<ProfileStage>("Windowing");
     }
 
     public static Rgb TransparentColor = (56, 30, 12);

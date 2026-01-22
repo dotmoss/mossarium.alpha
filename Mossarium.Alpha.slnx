@@ -2,6 +2,11 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/Auxiliaries/">
+    <Project Path="src/DebugProfiler/DebugProfiler.csproj" Id="2ecf2f96-0005-4bdb-a161-804e79fa9b1d">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
   <Folder Name="/Natives/">
     <Project Path="src/FreeType/FreeType.csproj" Id="d4938b19-3ffb-4b81-a5fd-3b161d23f7b1">
       <Platform Project="x64" />

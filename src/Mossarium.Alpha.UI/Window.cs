@@ -1,4 +1,5 @@
-﻿using Mossarium.Alpha.UI.Managers;
+﻿using DebugProfiler;
+using Mossarium.Alpha.UI.Managers;
 using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing;
 using Mossarium.Alpha.UI.Windowing.Structures;
@@ -17,6 +18,11 @@ public unsafe class Window : SystemWindow
     }
 
     public WindowManager.PrivateWindowManagerData PrivateWindowManagerData;
+
+    protected override void OnMouseLeftDown()
+    {
+        SendMessage(WindowMessage.NcLButtonDown, 0x02, 0x00);
+    }
 
     protected virtual void OnRendererInitialized()
     {
@@ -40,14 +46,14 @@ public unsafe class Window : SystemWindow
 
         GL.Clear(ClearMask.Color);
         
-        GlPrograms.AP.Use();
+        GlPrograms.RoundedRectangle.Use();
 
         var ubRoundedRectangleData = new UbRoundedRectangleData
         {
-            Position = (160, 120),
-            Size = (150, 120),
-            CornerRadius = 20,
-            Color = (1, 0, 0)
+            Color = (1, 0, 0),
+            CornerRadius = 30,
+            Position = (20, 20),
+            Size = (200, 200)
         };
         GlUniformBufferRegistry.RoundedRectangleData.Write(ubRoundedRectangleData);
 
@@ -60,6 +66,11 @@ public unsafe class Window : SystemWindow
     {
         WindowManager.FinalizeWindow(this);
         base.Dispose();
+    }
+    
+    static Window()
+    {
+        Profiler.Register<ProfileStage>("UserInterface");
     }
 
     public static new class Dispatcher

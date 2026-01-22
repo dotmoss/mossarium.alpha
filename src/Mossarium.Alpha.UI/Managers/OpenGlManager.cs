@@ -1,4 +1,5 @@
-﻿using Mossarium.Alpha.UI.OpenGL;
+﻿using DebugProfiler;
+using Mossarium.Alpha.UI.OpenGL;
 using OpenGL;
 
 namespace Mossarium.Alpha.UI.Managers;
@@ -10,14 +11,19 @@ public unsafe static class OpenGlManager
     {
         if (isInitialContextInitialized)
         {
+            Profiler.Push(ProfileStage.WindowGlContextInitialization);
             WindowGlContext.InitializeContext(window.DeviceContextHandle);
+            Profiler.Pop();
         }
         else
         {
             isInitialContextInitialized = true;
+
+            Profiler.Push(ProfileStage.FirstWindowGlContextInitialization);
             WindowGlContext.InitializeContext(window.DeviceContextHandle);
             GlUniformBufferRegistry.Initialize();
             GlPrograms.Initialize();
+            Profiler.Pop();
         }
     }
 

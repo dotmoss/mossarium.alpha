@@ -8,15 +8,14 @@
     <Platforms>x64</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup>
+	<DefineConstants Condition=" '$(Define_Enable_Debug_Profiler)' == 'true' ">$(DefineConstants);Enable_Debug_Profiler</DefineConstants>
+  </PropertyGroup>
+	
   <ItemGroup>
-    <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
-    <ProjectReference Include="..\WindowsOS\WindowsOS.csproj" />
+    <Compile Update="ModuleAttributes.cs">
+      <Visible>false</Visible>
+    </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-	<Compile Update="ModuleAttributes.cs">
-	  <Visible>false</Visible>
-	</Compile>
-  </ItemGroup>
-	
 </Project>

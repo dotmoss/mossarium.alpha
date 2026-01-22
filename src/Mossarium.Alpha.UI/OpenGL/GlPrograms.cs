@@ -1,26 +1,30 @@
-﻿using static OpenGL.Enums;
+﻿using DebugProfiler;
+using System.Drawing;
+using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
 public static class GlPrograms
 {
-    public static GlProgram GradientRgbTriangles, AP;
+    public static GlProgram GradientRgbTriangles, RoundedRectangle, TransparentWindowCorners;
 
     public static class Shader
     {
         public static class Vertex
         {
-            public static GlShader GradientRgbTriangles, AV;
+            public static GlShader GradientRgbTriangles, GeneratedRectangle, WindowRectangle;
         }
 
         public static class Fragment
         {
-            public static GlShader RgbToRgba, AF;
+            public static GlShader RgbToRgba, RoundedCorners, TransparentWindowCorners;
         }
     }
 
     public static void Initialize()
     {
+        Profiler.Push(ProfileStage.GlProgramsCompilation);
+
         Shader.Vertex.GradientRgbTriangles = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
@@ -39,7 +43,7 @@ void main()
 {
     gl_Position = vec4(
         inPos * winSizeT - 1.0,
-        0.0, 
+        0.0,
         1.0
     );
 
@@ -63,7 +67,7 @@ void main()
             Shader.Fragment.RgbToRgba
         );
 
-        Shader.Vertex.AV = new GlShader(ShaderType.Vertex,
+        Shader.Vertex.GeneratedRectangle = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -74,10 +78,10 @@ layout (std140, binding = 0) uniform WindowData
 
 layout (std140, binding = 1) uniform RoundedRectangleData 
 {
-    vec2 inPosition;
-    vec2 inSize;
     vec3 inColor;
     float inCornerRadius;
+    vec2 inPosition;
+    vec2 inSize;
 };
 
 void main()
@@ -92,7 +96,7 @@ void main()
     );
 }"u8);
 
-        Shader.Fragment.AF = new GlShader(ShaderType.Fragment,
+        Shader.Fragment.RoundedCorners = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -103,34 +107,45 @@ layout (std140, binding = 0) uniform WindowData
 
 layout (std140, binding = 1) uniform RoundedRectangleData 
 {
-    vec2 inPosition;
-    vec2 inSize;
     vec3 inColor;
     float inCornerRadius;
+    vec2 inPosition;
+    vec2 inSize;
 };
 
 out vec4 color;
-
-float roundedBoxSDF(vec2 center, vec2 size, float radius) 
+float squircleSDF(vec2 point, vec2 size, float radius) 
 {
-    return length(max(abs(center) - size + radius, 0.0)) - radius;
+    vec2 a = abs(point) - size + vec2(radius);
+    a = max(a, 0.0);    
+    vec2 a2 = a * a;
+    vec2 a4 = a2 * a2;
+    
+    float b = a4.x + a4.y;
+    float b05 = sqrt(b);
+    float b025 = sqrt(b05);
+    return b025 - radius;
 }
 
-void main() 
+void main()
 {
-    float edgeSoftness = 0.6;
+    const float edgeSoftness = 1.0;
 
-    vec2 lowerLeft = vec2(inPosition.x, inPosition.y);
     vec2 halfSize = inSize / 2.0;
+    vec2 center = inPosition + halfSize;
 
-    float distance = roundedBoxSDF(gl_FragCoord.xy - lowerLeft - halfSize, halfSize, inCornerRadius);
-    float smoothedAlpha = 1.0 - smoothstep(0.0, edgeSoftness * 2.0, distance);
+    float distance = squircleSDF(gl_FragCoord.xy - center, halfSize, inCornerRadius);
+
+    float smoothedAlpha = 1.0 - smoothstep(-edgeSoftness, edgeSoftness, distance);
+
     color = vec4(inColor, smoothedAlpha);
 }"u8);
 
-        AP = new GlProgram(
-            Shader.Vertex.AV,
-            Shader.Fragment.AF
+        RoundedRectangle = new GlProgram(
+            Shader.Vertex.GeneratedRectangle,
+            Shader.Fragment.RoundedCorners
         );
+
+        Profiler.Pop();
     }
 }
