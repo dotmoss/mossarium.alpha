@@ -53,7 +53,9 @@ public unsafe static class ThreadManager
                 while (ConsumerCancelableJobs.TryTake(out var job))
                 {
                     var (action, token) = job;
-                    action.Invoke(token);
+
+                    if (!token.IsCancellationRequested)
+                        action.Invoke(token);
                 }
             }
         }

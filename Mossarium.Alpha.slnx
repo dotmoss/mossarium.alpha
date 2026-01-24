@@ -28,6 +28,9 @@
     <File Path="README.md" />
 	<File Path=".editorconfig" />
   </Folder>
+  <Project Path="src/Mossarium.Alpha.UI.OpenGL.Bins/Mossarium.Alpha.UI.OpenGL.Bins.csproj" Id="8f692bdf-c5af-4e20-8ad0-8178d7fc4bac">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="src/Mossarium.Alpha.UI.OpenGL/Mossarium.Alpha.UI.OpenGL.csproj" Id="ce8a234b-2c13-4802-ad3e-a12356014682">
     <Platform Project="x64" />
   </Project>

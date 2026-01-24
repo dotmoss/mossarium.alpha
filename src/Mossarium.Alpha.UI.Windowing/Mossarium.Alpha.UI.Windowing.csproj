@@ -17,6 +17,9 @@
 	<Compile Update="ModuleAttributes.cs">
 	  <Visible>false</Visible>
 	</Compile>
+	<Compile Update="DebugProfiler.Stages.cs">
+	  <Visible>false</Visible>
+	</Compile>
   </ItemGroup>
 	
 </Project>

@@ -6,20 +6,16 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	<AssemblyName>ManagedOpenGL</AssemblyName>
-	<DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
-    <ProjectReference Include="..\WindowsOS\WindowsOS.csproj" />
   </ItemGroup>
 
-	
   <ItemGroup>
-	<Compile Update="ModuleAttributes.cs">
-	  <Visible>false</Visible>
-	</Compile>
+    <Compile Update="ModuleAttributes.cs">
+      <Visible>false</Visible>
+    </Compile>
 	<Compile Update="DebugProfiler.Stages.cs">
 	  <Visible>false</Visible>
 	</Compile>
