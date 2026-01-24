@@ -290,6 +290,7 @@ public unsafe abstract partial class SystemWindow : IDisposable
         Profiler.Register<ProfileStage>("Windowing");
     }
 
+    // TRANSPARENT_COLOR_REFERENCE
     public static Rgb TransparentColor = (56, 30, 12);
 
     public static class Dispatcher

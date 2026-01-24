@@ -6,13 +6,13 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public static class GlPrograms
 {
-    public static GlProgram GradientRgbTriangles, RoundedRectangle, TransparentWindowCorners;
+    public static GlProgram GradientRgbTriangles, RoundedWindowRectangle, TransparentWindowCorners;
 
     public static class Shader
     {
         public static class Vertex
         {
-            public static GlShader GradientRgbTriangles, GeneratedRectangle, WindowRectangle;
+            public static GlShader GradientRgbTriangles, GeneratedRectangle, TransparentWindowCorners;
         }
 
         public static class Fragment
@@ -28,7 +28,7 @@ public static class GlPrograms
         Shader.Vertex.GradientRgbTriangles = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
-layout (std140, binding = 0) uniform WindowData 
+layout (std140, binding = 0) uniform WindowData
 {
     vec2 winSize;
     vec2 winSizeT;
@@ -55,11 +55,11 @@ void main()
 
 in vec3 fragColor;
 
-out vec4 FragColor;
+out vec4 outColor;
 
 void main()
 {
-    FragColor = vec4(fragColor, 1.0);
+    outColor = vec4(fragColor, 1.0);
 }"u8);
 
         GradientRgbTriangles = new GlProgram(
@@ -90,7 +90,7 @@ void main()
     vec2 globalPos = inPosition + localPos;
 
     gl_Position = vec4(
-        (globalPos / winSize) * 2.0 - 1.0,
+        globalPos / winSize * 2.0 - 1.0,
         0.0,
         1.0
     );
@@ -113,7 +113,7 @@ layout (std140, binding = 1) uniform RoundedRectangleData
     vec2 inSize;
 };
 
-out vec4 color;
+out vec4 outColor;
 float squircleSDF(vec2 point, vec2 size, float radius) 
 {
     vec2 a = abs(point) - size + vec2(radius);
@@ -138,12 +138,69 @@ void main()
 
     float smoothedAlpha = 1.0 - smoothstep(-edgeSoftness, edgeSoftness, distance);
 
-    color = vec4(inColor, smoothedAlpha);
+    outColor = vec4(inColor, smoothedAlpha);
 }"u8);
 
-        RoundedRectangle = new GlProgram(
+        RoundedWindowRectangle = new GlProgram(
             Shader.Vertex.GeneratedRectangle,
             Shader.Fragment.RoundedCorners
+        );
+
+        Shader.Vertex.TransparentWindowCorners = new GlShader(ShaderType.Vertex,
+@"#version 430 core
+
+layout (std140, binding = 0) uniform WindowData 
+{
+    vec2 winSize;
+    vec2 winSizeT;
+};
+
+void main()
+{
+    float radius = 21;
+    float radius2 = radius * 2.0;
+    vec2 cornerSize = vec2(radius2);
+    
+    int localVertexID = gl_VertexID % 3;
+    vec2 globalDirection = vec2(gl_VertexID / 6, gl_VertexID % 6 / 3);
+    vec2 localDirectionMask = vec2(localVertexID / 2, localVertexID % 3 % 2);
+    vec2 localDirection = -(globalDirection * 2 - 1);
+    vec2 position = globalDirection * winSize + localDirectionMask * localDirection * cornerSize;
+
+    gl_Position = vec4(
+        position / winSize * 2.0 - 1.0,
+        0.0,
+        1.0
+    );
+}"u8);
+
+        Shader.Fragment.TransparentWindowCorners = new GlShader(ShaderType.Fragment,
+@"#version 430 core
+
+layout (std140, binding = 0) uniform WindowData 
+{
+    vec2 winSize;
+    vec2 winSizeT;
+};
+
+// TRANSPARENT_COLOR_REFERENCE
+const vec3 inColor = vec3(1.0 / 256.0 * 56.0, 1.0 / 256.0 * 30.0, 1.0 / 256.0 * 12.0);
+
+out vec4 outColor;
+void main()
+{
+    vec2 center = winSize / 2.0;
+    vec2 coord = center - abs(center - gl_FragCoord.xy);
+    
+    float distance = (coord.x + coord.y) * coord.x * coord.y;
+	distance = 1.0 - step(1450.0, distance);
+
+    outColor = vec4(inColor, distance);
+}"u8);
+
+        TransparentWindowCorners = new GlProgram(
+            Shader.Vertex.TransparentWindowCorners,
+            Shader.Fragment.TransparentWindowCorners
         );
 
         Profiler.Pop();

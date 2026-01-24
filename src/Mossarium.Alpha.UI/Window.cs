@@ -41,23 +41,13 @@ public unsafe class Window : SystemWindow
         GlUniformBufferRegistry.WindowData.Write(ubWindowData);
 
         vertexArray.Bind();
-        GL.Enable(Cap.Blend);
-        GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
 
+        GL.ClearColor(1f / 256 * 31, 1f / 256 * 31, 1f / 256 * 31, 1f);
         GL.Clear(ClearMask.Color);
-        
-        GlPrograms.RoundedRectangle.Use();
 
-        var ubRoundedRectangleData = new UbRoundedRectangleData
-        {
-            Color = (1, 0, 0),
-            CornerRadius = 30,
-            Position = (20, 20),
-            Size = (200, 200)
-        };
-        GlUniformBufferRegistry.RoundedRectangleData.Write(ubRoundedRectangleData);
+        GlPrograms.TransparentWindowCorners.Use();
 
-        GL.DrawArrays(Mode.TriangleStrip, 0, 4);
+        GL.DrawArrays(Mode.Triangles, 0, 12);
 
         GDI32.SwapBuffers(DeviceContextHandle);
     }

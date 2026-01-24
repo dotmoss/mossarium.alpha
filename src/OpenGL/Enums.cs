@@ -642,6 +642,8 @@ public static class Enums
     const int GL_FEEDBACK_BUFFER_SIZE = 3569;
     const int GL_SELECTION_BUFFER_SIZE = 3572;
     const int GL_FEEDBACK_BUFFER_TYPE = 3570;
+    const int GL_MINOR_VERSION = 0x821C;
+    const int GL_MAJOR_VERSION = 0x821B;
     public enum PName
     {
         AccumAlphaBits = GL_ACCUM_ALPHA_BITS,
@@ -882,7 +884,9 @@ public static class Enums
         ZoomY = GL_ZOOM_Y,
         FeedbackBufferSize = GL_FEEDBACK_BUFFER_SIZE,
         SelectionBufferSize = GL_SELECTION_BUFFER_SIZE,
-        FeedbackBufferType = GL_FEEDBACK_BUFFER_TYPE
+        FeedbackBufferType = GL_FEEDBACK_BUFFER_TYPE,
+        MinorVersion = GL_MINOR_VERSION,
+        MajorVersion = GL_MAJOR_VERSION
     }
 
     const int GL_BLEND = 3042;

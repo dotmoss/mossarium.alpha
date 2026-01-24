@@ -1,6 +1,7 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.OpenGL;
 using OpenGL;
+using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.Managers;
 
@@ -23,8 +24,19 @@ public unsafe static class OpenGlManager
             WindowGlContext.InitializeContext(window.DeviceContextHandle);
             GlUniformBufferRegistry.Initialize();
             GlPrograms.Initialize();
+            SetupInitialStates();
             Profiler.Pop();
         }
+    }
+
+    static void SetupInitialStates()
+    {
+        GL.Disable(Cap.DepthTest);
+        GL.Disable(Cap.ScissorTest);
+        GL.Disable(Cap.StencilTest);
+
+        GL.Enable(Cap.Blend);
+        GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
     }
 
     static nint currentDeviceContextHandle;
