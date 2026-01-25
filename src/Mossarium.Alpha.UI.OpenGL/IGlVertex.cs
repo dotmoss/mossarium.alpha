@@ -10,9 +10,15 @@ public unsafe interface IGlVertex<T>
         where TVertexImpl : unmanaged, IGlVertex<TVertexImpl>
         where TIndex : unmanaged;
 
-    protected static void DesribeAttribute(uint index, int count, DataType type, bool normilize, int offset)
+    protected static void DesribeFloatAttribute(uint index, int count, DataType type, bool normilize, int offset)
     {
-        GL.VertexAttribPointer(index, count, type, normilize, sizeof(T), (void*)offset);
         GL.EnableVertexAttribArray(index);
+        GL.VertexAttribPointer(index, count, type, normilize, sizeof(T), (void*)offset);
+    }
+
+    protected static void DesribeIntegerPointAttribute(uint index, int count, DataType type, int offset)
+    {
+        GL.EnableVertexAttribArray(index);
+        GL.VertexAttribIPointer(index, count, type, sizeof(T), (void*)offset);
     }
 }

@@ -18,7 +18,7 @@ public unsafe struct GlVertex : IGlVertex<GlVertex>
         where TVertexImpl : unmanaged, IGlVertex<TVertexImpl>
         where TIndex : unmanaged
     {
-        IGlVertex<GlVertex>.DesribeAttribute(0, 2, DataType.UShort, true, 0);
-        IGlVertex<GlVertex>.DesribeAttribute(1, 3, DataType.UByte, true, sizeof(LocationU2));
+        IGlVertex<GlVertex>.DesribeFloatAttribute(0, 2, DataType.UShort, true, 0);
+        IGlVertex<GlVertex>.DesribeFloatAttribute(1, 3, DataType.UByte, true, sizeof(LocationU2));
     }
 }

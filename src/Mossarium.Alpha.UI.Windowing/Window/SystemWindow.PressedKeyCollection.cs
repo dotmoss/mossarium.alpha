@@ -4,6 +4,7 @@ using WindowsOS;
 
 namespace Mossarium.Alpha.UI.Windowing;
 
+#pragma warning disable CS0649
 unsafe partial class SystemWindow
 {
 	struct PressedKeyCollection

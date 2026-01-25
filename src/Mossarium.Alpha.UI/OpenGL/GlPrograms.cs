@@ -116,8 +116,7 @@ layout (std140, binding = 1) uniform RoundedRectangleData
 out vec4 outColor;
 float squircleSDF(vec2 point, vec2 size, float radius) 
 {
-    vec2 a = abs(point) - size + vec2(radius);
-    a = max(a, 0.0);    
+    vec2 a = max(abs(point) - size + vec2(radius), 0.0);
     vec2 a2 = a * a;
     vec2 a4 = a2 * a2;
     

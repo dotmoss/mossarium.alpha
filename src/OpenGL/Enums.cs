@@ -1153,6 +1153,18 @@ public static class Enums
         Texture2D = GL_TEXTURE_2D
     }
 
+    public enum Tex1DTarget
+    {
+        Texture = GL_TEXTURE_1D,
+        ProxyTexture = GL_PROXY_TEXTURE_1D
+    }
+
+    public enum Tex2DTarget
+    {
+        Texture = GL_TEXTURE_2D,
+        ProxyTexture = GL_PROXY_TEXTURE_2D
+    }
+
     const int GL_TEXTURE_WIDTH = 4096;
     const int GL_TEXTURE_HEIGHT = 4097;
     const int GL_TEXTURE_INTERNAL_FORMAT = 4099;

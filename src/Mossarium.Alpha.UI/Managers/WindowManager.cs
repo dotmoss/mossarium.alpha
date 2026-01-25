@@ -1,5 +1,4 @@
 ﻿using Mossarium.Alpha.UI.Windowing;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using WindowsOS;
@@ -7,6 +6,7 @@ using WindowsOS.Utils;
 
 namespace Mossarium.Alpha.UI.Managers;
 
+#pragma warning disable CS0649
 public static unsafe class WindowManager
 {
     static List<Window> windows = new List<Window>();

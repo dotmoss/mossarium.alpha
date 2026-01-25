@@ -1,5 +1,6 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.OpenGL;
+using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
 using static OpenGL.Enums;
 
@@ -37,6 +38,9 @@ public unsafe static class OpenGlManager
 
         GL.Enable(Cap.Blend);
         GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
+
+        var clearColor = new Rgb(31, 31, 31);
+        GL.ClearColor(1f / 256 * clearColor.R, 1f / 256 * clearColor.G, 1f / 256 * clearColor.B, 1f);
     }
 
     static nint currentDeviceContextHandle;

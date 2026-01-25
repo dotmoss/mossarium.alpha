@@ -5,6 +5,15 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public unsafe struct GlBuffer : IDisposable
 {
+    public GlBuffer() => throw null!;
+
+    private GlBuffer(uint id, BufferType type, BufferUsage usage)
+    {
+        ID = id;
+        Type = type;
+        Usage = usage;
+    }
+
     public uint ID { get; private set; }
     public BufferType Type { get; private set; }
     public BufferUsage Usage { get; private set; }
@@ -89,12 +98,7 @@ public unsafe struct GlBuffer : IDisposable
 
     public static GlBuffer From(uint id, BufferType type, BufferUsage usage)
     {
-        var buffer = new GlBuffer
-        {
-            ID = id,
-            Type = type,
-            Usage = usage
-        };
+        var buffer = new GlBuffer(id, type, usage);
 
         return buffer;
     }
@@ -158,7 +162,7 @@ public unsafe struct GlBuffer : IDisposable
     static void GenerateMultiple(ReadOnlySpan<nint> buffers)
     {
         var count = buffers.Length;
-        var ids = stackalloc uint[buffers.Length];
+        var ids = stackalloc uint[count];
         GL.GenerateBuffers((uint)count, ids);
         fixed (nint* buffersPointer = buffers)
         {
@@ -172,7 +176,7 @@ public unsafe struct GlBuffer : IDisposable
     public static void DisposeMultiple(ReadOnlySpan<GlBuffer> buffers)
     {
         var count = buffers.Length;
-        var ids = stackalloc uint[buffers.Length];
+        var ids = stackalloc uint[count];
         fixed (GlBuffer* buffersPointer = buffers)
         {
             for (var index = 0; index < count; index++)
@@ -180,6 +184,6 @@ public unsafe struct GlBuffer : IDisposable
                 ids[index] = buffersPointer[index].ID;
             }
         }
-        GL.GenerateBuffers((uint)count, ids);
+        GL.DeleteBuffers((uint)count, ids);
     }
 }

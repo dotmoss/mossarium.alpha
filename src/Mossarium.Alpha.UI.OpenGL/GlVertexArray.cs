@@ -7,6 +7,8 @@ public unsafe struct GlVertexArray<TVertex, TIndex>
     where TVertex : unmanaged, IGlVertex<TVertex>
     where TIndex : unmanaged
 {
+    public GlVertexArray() => throw null!;
+
     public uint ID { get; private set; }
     public BUType IndexType 
     {

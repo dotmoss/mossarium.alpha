@@ -26,6 +26,8 @@ public unsafe static class GL
         glBufferData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void>)GetProcAddress("glBufferData"u8);
         glBufferSubData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void>)GetProcAddress("glBufferSubData"u8);
         glVertexAttribPointer = (delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, bool, int, void*, void>)GetProcAddress("glVertexAttribPointer"u8);
+        glVertexAttribIPointer = (delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, int, void*, void>)GetProcAddress("glVertexAttribIPointer"u8);
+        glVertexAttribDivisor = (delegate* unmanaged[SuppressGCTransition]<uint, uint, void>)GetProcAddress("glVertexAttribDivisor"u8);
         glEnableVertexAttribArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glEnableVertexAttribArray"u8);
         glUseProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glUseProgram"u8);
         glCreateProgram = (delegate* unmanaged[SuppressGCTransition]<uint>)GetProcAddress("glCreateProgram"u8);
@@ -37,11 +39,13 @@ public unsafe static class GL
         glDeleteShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteShader"u8);
         glDeleteProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteProgram"u8);
         glUniform1f = (delegate* unmanaged[SuppressGCTransition]<int, float, void>)GetProcAddress("glUniform1f"u8);
+        glUniform1i = (delegate* unmanaged[SuppressGCTransition]<int, int, void>)GetProcAddress("glUniform1i"u8);
         glUniform2f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, void>)GetProcAddress("glUniform2f"u8);
         glUniform3f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void>)GetProcAddress("glUniform3f"u8);
         glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
         glPushDebugGroup = (delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void>)GetProcAddress("glPushDebugGroup"u8);
         glPopDebugGroup = (delegate* unmanaged[SuppressGCTransition]<void>)GetProcAddress("glPopDebugGroup"u8);
+        glActiveTexture = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glActiveTexture"u8);
 
         Profiler.Pop();
 
@@ -72,6 +76,8 @@ public unsafe static class GL
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void> glBufferData;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void> glBufferSubData;
     static delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, bool, int, void*, void> glVertexAttribPointer;
+    static delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, int, void*, void> glVertexAttribIPointer;
+    static delegate* unmanaged[SuppressGCTransition]<uint, uint, void> glVertexAttribDivisor;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glEnableVertexAttribArray;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glUseProgram;
     static delegate* unmanaged[SuppressGCTransition]<uint> glCreateProgram;
@@ -83,11 +89,13 @@ public unsafe static class GL
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteProgram;
     static delegate* unmanaged[SuppressGCTransition]<int, float, void> glUniform1f;
+    static delegate* unmanaged[SuppressGCTransition]<int, int, void> glUniform1i;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, void> glUniform2f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void> glUniform3f;
     static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void> glUniform4f;
     static delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void> glPushDebugGroup;
     static delegate* unmanaged[SuppressGCTransition]<void> glPopDebugGroup;
+    static delegate* unmanaged[SuppressGCTransition]<uint, void> glActiveTexture;
 
     public static void CompileShader(uint shader) => glCompileShader(shader);
 
@@ -151,6 +159,12 @@ public unsafe static class GL
     public static void VertexAttribPointer(uint index, int size, DataType type, bool normalized, int stride, void* pointer)
         => glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 
+    public static void VertexAttribIPointer(uint index, int size, DataType type, int stride, void* pointer)
+        => glVertexAttribIPointer(index, size, type, stride, pointer);
+
+    public static void VertexAttribDivisor(uint index, uint divisor)
+        => glVertexAttribDivisor(index, divisor);
+
     public static void EnableVertexAttribArray(uint index)
         => glEnableVertexAttribArray(index);
 
@@ -187,6 +201,9 @@ public unsafe static class GL
     public static void DeleteProgram(uint program)
         => glDeleteProgram(program);
 
+    public static void Uniform(int index, int value)
+        => glUniform1i(index, value);
+
     public static void Uniform(int index, float value)
         => glUniform1f(index, value);
 
@@ -204,6 +221,9 @@ public unsafe static class GL
 
     public static void PopDebugGroup()
         => glPopDebugGroup();
+
+    public static void ActiveTexture(uint texture)
+        => glActiveTexture(texture);
 
     public static void PushDebugGroup(DebugSource source, uint id, ReadOnlySpan<byte> message)
     {
@@ -503,14 +523,14 @@ public unsafe static class GL
     [DllImport(gl, EntryPoint = "glDeleteLists"), SuppressGCTransition]
     public static extern void DeleteLists(uint list, int range);
 
-    public static void DeleteTextures(int n, uint[] textures)
+    public static void DeleteTextures(uint n, uint[] textures)
     {
         fixed (uint* texturesPtr = textures)
             DeleteTextures(n, texturesPtr);
     }
 
     [DllImport(gl, EntryPoint = "glDeleteTextures"), SuppressGCTransition]
-    public static extern void DeleteTextures(int n, uint* textures);
+    public static extern void DeleteTextures(uint n, uint* textures);
 
     [DllImport(gl, EntryPoint = "glDepthFunc"), SuppressGCTransition]
     public static extern void DepthFunc(Func func);
@@ -682,9 +702,9 @@ public unsafe static class GL
     public static extern uint GenLists(int range);
 
     [DllImport(gl, EntryPoint = "glGenTextures"), SuppressGCTransition]
-    public static extern void GenTextures(int n, uint* textures);
+    public static extern void GenTextures(uint n, uint* textures);
 
-    public static void GenTextures(int n, uint[] textures)
+    public static void GenTextures(uint n, uint[] textures)
     {
         fixed (uint* texturesPtr = textures)
             GenTextures(n, texturesPtr);
@@ -1923,10 +1943,10 @@ public unsafe static class GL
     }
 
     [DllImport(gl, EntryPoint = "glTexImage1D"), SuppressGCTransition]
-    public static extern void TexImage(int level, InternalFormat internalformat, int width, int border, ImageFormat format, ImageType type, nint pixels);
+    public static extern void TexImage(Tex1DTarget target, int level, InternalFormat internalformat, int width, int border, ImageFormat format, ImageType type, void* pixels);
 
     [DllImport(gl, EntryPoint = "glTexImage2D"), SuppressGCTransition]
-    public static extern void TexImage(int level, InternalFormat internalformat, int width, int height, int border, ImageFormat format, ImageType type, nint pixels);
+    public static extern void TexImage(Tex2DTarget target, int level, InternalFormat internalformat, int width, int height, int border, ImageFormat format, ImageType type, void* pixels);
 
     [DllImport(gl, EntryPoint = "glTexParameterf"), SuppressGCTransition]
     public static extern void TexParameter(TexTarget target, TexNV2 pname, float param);
@@ -1953,10 +1973,20 @@ public unsafe static class GL
     }
 
     [DllImport(gl, EntryPoint = "glTexSubImage1D"), SuppressGCTransition]
-    public static extern void TexSubImage(int level, int xoffset, int width, ImageFormat format, ImageType type, nint pixels);
+    public static extern void TexSubImage(Tex1DTarget target, int level, int xoffset, int width, ImageFormat format, ImageType type, void* pixels);
+
+    public static void TexSubImage(int level, int xoffset, int width, ImageFormat format, ImageType type, void* pixels)
+    {
+        TexSubImage(Tex1DTarget.Texture, level, xoffset, width, format, type, pixels);
+    }
 
     [DllImport(gl, EntryPoint = "glTexSubImage2D"), SuppressGCTransition]
-    public static extern void TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, nint pixels);
+    public static extern void TexSubImage(Tex2DTarget target, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels);
+
+    public static void TexSubImage(int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels)
+    {
+        TexSubImage(Tex2DTarget.Texture, level, xoffset, yoffset, width, height, format, type, pixels);
+    }
 
     [DllImport(gl, EntryPoint = "glTranslated"), SuppressGCTransition]
     public static extern void Translate(double x, double y, double z);
