@@ -1,5 +1,4 @@
 ﻿using OpenGL;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
@@ -10,15 +9,15 @@ public unsafe struct GlVertexArray<TVertex, TIndex>
     public GlVertexArray() => throw null!;
 
     public uint ID { get; private set; }
-    public BUType IndexType 
+    public ElementIndexType IndexType 
     {
         get => this switch
         {
-            GlVertexArray<TVertex, byte> value => BUType.UByte,
-            GlVertexArray<TVertex, short> value => BUType.UShort,
-            GlVertexArray<TVertex, ushort> value => BUType.UShort,
-            GlVertexArray<TVertex, int> value => BUType.UInt,
-            GlVertexArray<TVertex, uint> value => BUType.UInt,
+            GlVertexArray<TVertex, byte> value => ElementIndexType.UByte,
+            GlVertexArray<TVertex, short> value => ElementIndexType.UShort,
+            GlVertexArray<TVertex, ushort> value => ElementIndexType.UShort,
+            GlVertexArray<TVertex, int> value => ElementIndexType.UInt,
+            GlVertexArray<TVertex, uint> value => ElementIndexType.UInt,
             _ => throw null!
         };
     }
@@ -28,7 +27,7 @@ public unsafe struct GlVertexArray<TVertex, TIndex>
         GL.BindVertexArray(ID);
     }
 
-    public void DrawElements(Mode mode, int offset, int count)
+    public void DrawElements(DrawMode mode, int offset, int count)
     {
         GL.DrawElements(mode, count, IndexType, offset);
     }

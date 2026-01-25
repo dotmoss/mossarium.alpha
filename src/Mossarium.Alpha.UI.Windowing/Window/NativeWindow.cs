@@ -20,8 +20,9 @@ public unsafe struct NativeWindow : IDisposable
     {
         get
         {
-            var rectangle = User32.GetWindowRectangle(Handle);
-            return new Win32Rectangle(rectangle.X, rectangle.Y, rectangle.X2, rectangle.Y2);
+            var rectangle = stackalloc int[4];
+            User32.GetWindowRectangle(Handle, rectangle);
+            return new Win32Rectangle(rectangle[0], rectangle[1], rectangle[2], rectangle[3]);
         }
         set => User32.SetWindowRectangle(Handle, value.X, value.Y, value.Width, value.Height);
     }

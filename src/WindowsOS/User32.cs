@@ -6,7 +6,7 @@ public unsafe static partial class User32
 {
     const string user = "user32";
 
-    #region DllImports
+    #region Imports
     [LibraryImport(user), SuppressGCTransition] public static partial
         int GetWindowLongW(nint hWnd, int nIndex);
 
@@ -20,20 +20,7 @@ public unsafe static partial class User32
         long SetWindowLongPtrW(nint hWnd, int nIndex, long dwNewLong);
 
     [LibraryImport(user), SuppressGCTransition] public static partial
-        nint CreateWindowExW(
-            int dwExStyle, 
-            char* lpClassName, 
-            char* lpWindowName, 
-            int dwStyle, 
-            int x, 
-            int y,
-            int nWidth, 
-            int nHeight, 
-            nint hWndParent, 
-            nint hMenu, 
-            nint hInstance, 
-            nint lpParam
-        );
+        nint CreateWindowExW(int dwExStyle, char* lpClassName, char* lpWindowName, int dwStyle, int x, int y, int nWidth, int nHeight, nint hWndParent, nint hMenu, nint hInstance, nint lpParam);
 
     [LibraryImport(user), SuppressGCTransition] public static partial
         int GetWindowTextW(nint hWnd, char* lpString, int nMaxCount);
@@ -102,7 +89,8 @@ public unsafe static partial class User32
             return MessageBoxW(handle, textChars, captionChars, type);
     }
 
-    public static int MessageBox(string text, string caption = "") => MessageBox(0, text, caption, 0);
+    public static int MessageBox(string text, string caption = "") 
+        => MessageBox(0, text, caption, 0);
 
     public static int PeekMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax, uint removeMessage) 
         => PeekMessageW(message, handle, msgFilterMin, msgFilterMax, removeMessage);
@@ -110,25 +98,19 @@ public unsafe static partial class User32
     public static int GetMessage(Message* message, nint handle, uint msgFilterMin, uint msgFilterMax) 
         => GetMessageW(message, handle, msgFilterMin, msgFilterMax);
 
-    public static int GetWindowLong(nint handle, WindowLongField field) => GetWindowLongW(handle, (int)field);
-    public static void SetWindowLong(nint handle, WindowLongField field, int value) => SetWindowLongW(handle, (int)field, value);
+    public static int GetWindowLong(nint handle, WindowLongField field) 
+        => GetWindowLongW(handle, (int)field);
 
-    public static long GetWindowLongPtr(nint handle, WindowLongField field) => GetWindowLongPtrW(handle, (int)field);
-    public static long SetWindowLongPtr(nint handle, WindowLongField field, nint value) => SetWindowLongPtrW(handle, (int)field, value);
+    public static void SetWindowLong(nint handle, WindowLongField field, int value) 
+        => SetWindowLongW(handle, (int)field, value);
 
-    public static nint CreateWindow(
-        WindowExStyles styleEx,
-        ushort className,
-        string windowName,
-        WindowStyles style,
-        int x,
-        int y,
-        int width,
-        int height,
-        nint hWndParent,
-        nint menu,
-        nint hInstance,
-        nint lpParam)
+    public static long GetWindowLongPtr(nint handle, WindowLongField field) 
+        => GetWindowLongPtrW(handle, (int)field);
+
+    public static long SetWindowLongPtr(nint handle, WindowLongField field, nint value) 
+        => SetWindowLongPtrW(handle, (int)field, value);
+
+    public static nint CreateWindow(WindowExStyles styleEx, ushort className, string windowName, WindowStyles style, int x, int y, int width, int height, nint hWndParent, nint menu, nint hInstance, nint lpParam)     
     {
         fixed (char* windowNameChars = windowName)
             return CreateWindowExW((int)styleEx, (char*)className, windowNameChars, (int)style, x, y, width, height, hWndParent, menu, hInstance, lpParam);
@@ -143,7 +125,8 @@ public unsafe static partial class User32
         return Marshal.PtrToStringUni((nint)buffer)!;
     }
 
-    public static void SetWindowTitle(nint handle, char* text) => SetWindowTextW(handle, text);
+    public static void SetWindowTitle(nint handle, char* text) 
+        => SetWindowTextW(handle, text);
 
     public static void SetWindowTitle(nint handle, string text)
     {
@@ -160,22 +143,23 @@ public unsafe static partial class User32
     public static void SetWindowPos(nint handle, int x, int y, int width, int height)
         => SetWindowPos(handle, x, y, width, height, SetWindowPosFlags.NoZOrder);
 
-    public static (int X, int Y, int X2, int Y2) GetWindowRectangle(nint handle)
-    {
-        (int, int, int, int) rectangle;
-        GetWindowRect(handle, (int*)&rectangle);
-        return rectangle;
-    }
-    public static void SetWindowRectangle(nint handle, int x, int y, int width, int height) => SetWindowPos(handle, x, y, width, height);
+    public static void GetWindowRectangle(nint handle, int* rectangle)
+        => GetWindowRect(handle, rectangle);
 
-    public static WindowStyles GetWindowStyle(nint handle) => (WindowStyles)GetWindowLong(handle, WindowLongField.Style);
+    public static void SetWindowRectangle(nint handle, int x, int y, int width, int height) 
+        => SetWindowPos(handle, x, y, width, height);
+
+    public static WindowStyles GetWindowStyle(nint handle) 
+        => (WindowStyles)GetWindowLong(handle, WindowLongField.Style);
+
     public static void SetWindowStyle(nint handle, WindowStyles style)
     {
         SetWindowLong(handle, WindowLongField.Style, (int)style);
         UpdateWindowStyle(handle);
     }
 
-    public static WindowExStyles GetWindowExStyle(nint handle) => (WindowExStyles)GetWindowLong(handle, WindowLongField.ExStyle);
+    public static WindowExStyles GetWindowExStyle(nint handle) 
+        => (WindowExStyles)GetWindowLong(handle, WindowLongField.ExStyle);
 
     public static void SetWindowExStyle(nint handle, WindowExStyles style)
     {
@@ -183,7 +167,8 @@ public unsafe static partial class User32
         UpdateWindowStyle(handle);
     }
 
-    public static nint SetWindowWndProcFunction(nint handle, nint pointer) => (nint)SetWindowLongPtr(handle, WindowLongField.WndProc, pointer);
+    public static nint SetWindowWndProcFunction(nint handle, nint pointer) 
+        => (nint)SetWindowLongPtr(handle, WindowLongField.WndProc, pointer);
 
     public static long CallWindowProccess(nint handle, nint function, WindowMessage message, ulong wParam, ulong lParam)
         => CallWindowProcW((void*)function, handle, message, wParam, lParam);

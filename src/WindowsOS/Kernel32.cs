@@ -6,7 +6,7 @@ public unsafe partial class Kernel32
 {
     const string kernel = "kernel32";
 
-    #region DllImports
+    #region Imports
     [LibraryImport(kernel), SuppressGCTransition] public static partial
         nint GetModuleHandleA(byte* name);
 
@@ -99,7 +99,9 @@ public unsafe partial class Kernel32
             return LoadLibraryA(dllPathBytes);
     }
 
-    public static uint WaitForSingleObject(nint handle) => WaitForSingleObject(handle, 0xFFFFFFFF);
+    public static uint WaitForSingleObject(nint handle) 
+        => WaitForSingleObject(handle, 0xFFFFFFFF);
 
-    public static uint WaitForSingleObjectEx(nint handle, [MarshalAs(UnmanagedType.Bool)] bool alertable) => WaitForSingleObjectEx(handle, 0xFFFFFFFF, alertable);
+    public static uint WaitForSingleObjectEx(nint handle, [MarshalAs(UnmanagedType.Bool)] bool alertable)
+        => WaitForSingleObjectEx(handle, 0xFFFFFFFF, alertable);
 }

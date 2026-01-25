@@ -4,7 +4,7 @@ public unsafe static partial class HarfBuzz
 {
     const string harfbuzz = "harfbuzz";
 
-    #region DllImports
+    #region Imports
     [LibraryImport(harfbuzz), SuppressGCTransition] public static partial
         hb_font_t* hb_ft_font_create(FT_Face ft_face, void* destroy);
 

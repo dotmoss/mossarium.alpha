@@ -2,7 +2,6 @@
 using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.Managers;
 
@@ -32,11 +31,11 @@ public unsafe static class OpenGlManager
 
     static void SetupInitialStates()
     {
-        GL.Disable(Cap.DepthTest);
-        GL.Disable(Cap.ScissorTest);
-        GL.Disable(Cap.StencilTest);
+        GL.Disable(StateCap.DepthTest);
+        GL.Disable(StateCap.ScissorTest);
+        GL.Disable(StateCap.StencilTest);
 
-        GL.Enable(Cap.Blend);
+        GL.Enable(StateCap.Blend);
         GL.BlendFunc(FactorEnum.SrcAlpha, FactorEnum.OneMinusSrcAlpha);
 
         var clearColor = new Rgb(31, 31, 31);

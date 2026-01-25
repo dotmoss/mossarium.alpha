@@ -1,68 +1,57 @@
 ﻿using DebugProfiler;
 using System.Runtime.InteropServices;
 using WindowsOS;
-using static OpenGL.Enums;
 
 namespace OpenGL;
 
-public unsafe static class GL
+#pragma warning disable CS0649
+public unsafe static partial class GL
 {
+    static GL()
+    {
+        if (Kernel32.LoadLibrary("opengl32"u8) == 0)
+            throw null!;
+    }
+
+    const string gl = "opengl32";
+
     public static void InititalizeContextFunctions()
     {
         Profiler.Register<ProfileStage>("OpenGL");
         Profiler.Push(ProfileStage.InititalizeContextFunctions);
 
-        wglCreateContextAttribsARB = (delegate* unmanaged[SuppressGCTransition]<nint, nint, int*, nint>)GetProcAddress("wglCreateContextAttribsARB"u8);
-        wglChoosePixelFormatARB = (delegate* unmanaged[SuppressGCTransition]<nint, int*, float*, uint, int*, uint*, bool>)GetProcAddress("wglChoosePixelFormatARB"u8);
-        glCreateShader = (delegate* unmanaged[SuppressGCTransition]<ShaderType, uint>)GetProcAddress("glCreateShader"u8);
-        glShaderSource = (delegate* unmanaged[SuppressGCTransition]<uint, int, byte**, int*, void>)GetProcAddress("glShaderSource"u8);
-        glCompileShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glCompileShader"u8);
-        glGenVertexArrays = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glGenVertexArrays"u8);
-        glGenBuffers = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glGenBuffers"u8);
-        glDeleteBuffers = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glDeleteBuffers"u8);
-        glBindVertexArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glBindVertexArray"u8);
-        glDeleteVertexArray = (delegate* unmanaged[SuppressGCTransition]<uint, uint*, void>)GetProcAddress("glDeleteVertexArrays"u8);
-        glBindBuffer = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, void>)GetProcAddress("glBindBuffer"u8);
-        glBufferData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, void*, BufferUsage, void>)GetProcAddress("glBufferData"u8);
-        glBufferSubData = (delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void>)GetProcAddress("glBufferSubData"u8);
-        glVertexAttribPointer = (delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, bool, int, void*, void>)GetProcAddress("glVertexAttribPointer"u8);
-        glVertexAttribIPointer = (delegate* unmanaged[SuppressGCTransition]<uint, int, DataType, int, void*, void>)GetProcAddress("glVertexAttribIPointer"u8);
-        glVertexAttribDivisor = (delegate* unmanaged[SuppressGCTransition]<uint, uint, void>)GetProcAddress("glVertexAttribDivisor"u8);
-        glEnableVertexAttribArray = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glEnableVertexAttribArray"u8);
-        glUseProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glUseProgram"u8);
-        glCreateProgram = (delegate* unmanaged[SuppressGCTransition]<uint>)GetProcAddress("glCreateProgram"u8);
-        glAttachShader = (delegate* unmanaged[SuppressGCTransition]<uint, uint, void>)GetProcAddress("glAttachShader"u8);
-        glLinkProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glLinkProgram"u8);
-        glGetShaderiv = (delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void>)GetProcAddress("glGetShaderiv"u8);
-        glGetProgramiv = (delegate* unmanaged[SuppressGCTransition]<uint, ProgramStatusName, int*, void>)GetProcAddress("glGetProgramiv"u8);
-        glBindBufferBase = (delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void>)GetProcAddress("glBindBufferBase"u8);
-        glDeleteShader = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteShader"u8);
-        glDeleteProgram = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glDeleteProgram"u8);
-        glUniform1f = (delegate* unmanaged[SuppressGCTransition]<int, float, void>)GetProcAddress("glUniform1f"u8);
-        glUniform1i = (delegate* unmanaged[SuppressGCTransition]<int, int, void>)GetProcAddress("glUniform1i"u8);
-        glUniform2f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, void>)GetProcAddress("glUniform2f"u8);
-        glUniform3f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void>)GetProcAddress("glUniform3f"u8);
-        glUniform4f = (delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void>)GetProcAddress("glUniform4f"u8);
-        glPushDebugGroup = (delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void>)GetProcAddress("glPushDebugGroup"u8);
-        glPopDebugGroup = (delegate* unmanaged[SuppressGCTransition]<void>)GetProcAddress("glPopDebugGroup"u8);
-        glActiveTexture = (delegate* unmanaged[SuppressGCTransition]<uint, void>)GetProcAddress("glActiveTexture"u8);
-
-        Profiler.Pop();
-
-        nint GetProcAddress(ReadOnlySpan<byte> name)
+        var names =
+            "glCreateProgram\0wglChoosePixelFormatARB\0glCreateShader\0glShaderSource\0glCompileShader\0glGenVertexArrays\0"u8 +
+            "glGenBuffers\0glDeleteBuffers\0glBindVertexArray\0glDeleteVertexArrays\0glBindBuffer\0glBufferData\0glBufferSubData\0"u8 +
+            "glVertexAttribPointer\0glVertexAttribIPointer\0glVertexAttribDivisor\0glEnableVertexAttribArray\0glUseProgram\0wglCreateContextAttribsARB\0"u8 +
+            "glAttachShader\0glLinkProgram\0glGetShaderiv\0glGetProgramiv\0glBindBufferBase\0glDeleteShader\0glDeleteProgram\0"u8 +
+            "glPushDebugGroup\0glPopDebugGroup\0glActiveTexture"u8;
+        fixed (byte* namesPointer = names)
         {
-            fixed (byte* nameBytes = name)
-            {
-                var processAddress = GL.GetProcAddress(nameBytes);
-                if (processAddress == 0)
-                    throw null!;
+            var pointer = namesPointer;
+            var pointerEnd = pointer + names.Length - 1;
 
-                return processAddress;
+            fixed (void* firstFunctionPointer = &glCreateProgram)
+            {
+                var functionPointer = (nint*)firstFunctionPointer;
+                do
+                {
+                    var function = GL.GetProcAddress(pointer);
+#if DEBUG
+                    if (function == 0)
+                        throw null!;
+#endif
+                    *functionPointer++ = function;
+                    pointer += new ReadOnlySpan<byte>(pointer, short.MaxValue).IndexOf((byte)0) + 1;
+                }
+                while (pointer < pointerEnd);
             }
         }
+
+        Profiler.Pop();
     }
 
-    static delegate* unmanaged[SuppressGCTransition]<nint, nint, int*, nint> wglCreateContextAttribsARB;
+    static delegate* unmanaged[SuppressGCTransition]<uint> glCreateProgram;
     static delegate* unmanaged[SuppressGCTransition]<nint, int*, float*, uint, int*, uint*, bool> wglChoosePixelFormatARB;
     static delegate* unmanaged[SuppressGCTransition]<ShaderType, uint> glCreateShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, int, byte**, int*, void> glShaderSource;
@@ -80,7 +69,7 @@ public unsafe static class GL
     static delegate* unmanaged[SuppressGCTransition]<uint, uint, void> glVertexAttribDivisor;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glEnableVertexAttribArray;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glUseProgram;
-    static delegate* unmanaged[SuppressGCTransition]<uint> glCreateProgram;
+    static delegate* unmanaged[SuppressGCTransition]<nint, nint, int*, nint> wglCreateContextAttribsARB;
     static delegate* unmanaged[SuppressGCTransition]<uint, uint, void> glAttachShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glLinkProgram;
     static delegate* unmanaged[SuppressGCTransition]<uint, ShaderStatusName, int*, void> glGetShaderiv;
@@ -88,16 +77,12 @@ public unsafe static class GL
     static delegate* unmanaged[SuppressGCTransition]<BufferType, uint, uint, void> glBindBufferBase;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteShader;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glDeleteProgram;
-    static delegate* unmanaged[SuppressGCTransition]<int, float, void> glUniform1f;
-    static delegate* unmanaged[SuppressGCTransition]<int, int, void> glUniform1i;
-    static delegate* unmanaged[SuppressGCTransition]<int, float, float, void> glUniform2f;
-    static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, void> glUniform3f;
-    static delegate* unmanaged[SuppressGCTransition]<int, float, float, float, float, void> glUniform4f;
     static delegate* unmanaged[SuppressGCTransition]<DebugSource, uint, int, byte*, void> glPushDebugGroup;
     static delegate* unmanaged[SuppressGCTransition]<void> glPopDebugGroup;
     static delegate* unmanaged[SuppressGCTransition]<uint, void> glActiveTexture;
 
-    public static void CompileShader(uint shader) => glCompileShader(shader);
+    public static void CompileShader(uint shader)
+        => glCompileShader(shader);
 
     public static void ShaderSource(uint shader, ReadOnlySpan<byte> source)
     {
@@ -105,7 +90,8 @@ public unsafe static class GL
             glShaderSource(shader, 1, &sourceBytes, null);
     }
 
-    public static uint CreateShader(ShaderType type) => glCreateShader(type);
+    public static uint CreateShader(ShaderType type) 
+        => glCreateShader(type);
 
     public static nint CreateContextAttribsARB(nint hdc, nint shareContext, int* attributeList)
         => wglCreateContextAttribsARB(hdc, shareContext, attributeList);
@@ -113,51 +99,40 @@ public unsafe static class GL
     public static bool ChoosePixelFormatARB(nint hdc, int* iAttributeList, float* fAttributeList, uint maxFormats, int* formats, uint* numFormats)
         => wglChoosePixelFormatARB(hdc, iAttributeList, fAttributeList, maxFormats, formats, numFormats);
 
-    public static void GenerateVertexArrays(uint count, uint* array)
-        => glGenVertexArrays(count, array);
+    public static void GenerateVertexArrays(uint count, uint* ids)
+        => glGenVertexArrays(count, ids);
 
-    public static void GenerateBuffers(uint count, uint* arrays)
-        => glGenBuffers(count, arrays);
+    public static void GenerateBuffers(uint count, uint* ids)
+        => glGenBuffers(count, ids);
 
-    public static void DeleteBuffers(uint count, uint* array)
-        => glDeleteBuffers(count, array);
+    public static void DeleteBuffers(uint count, uint* ids)
+        => glDeleteBuffers(count, ids);
 
-    public static void BindVertexArray(uint array)
-        => glBindVertexArray(array);
+    public static void BindVertexArray(uint arrayId)
+        => glBindVertexArray(arrayId);
 
-    public static void DeleteVertexArray(uint count, uint* arrays)
-        => glDeleteVertexArray(count, arrays);
+    public static void DeleteVertexArray(uint count, uint* ids)
+        => glDeleteVertexArray(count, ids);
 
-    public static void BindBuffer(BufferType targetType, uint array)
-        => glBindBuffer(targetType, array);
+    public static void BindBuffer(BufferType targetType, uint arrayId)
+        => glBindBuffer(targetType, arrayId);
 
     public static void BufferData(BufferType targetType, int size, void* data, BufferUsage usage)
         => glBufferData(targetType, size, data, usage);
 
-    public static void BufferData<T>(BufferType targetType, T[] array, BufferUsage usage)
-        where T : unmanaged
-    {
-        fixed (T* pointer = array)
-            glBufferData(targetType, array.Length * sizeof(T), pointer, usage);
-    }
-
     public static void BufferData<T>(BufferType targetType, T data, BufferUsage usage)
         where T : unmanaged
-    {
-        glBufferData(targetType, sizeof(T), &data, usage);
-    }
+        => glBufferData(targetType, sizeof(T), &data, usage);
 
     public static void BufferData<T>(BufferType targetType, T* data, BufferUsage usage)
         where T : unmanaged
-    {
-        glBufferData(targetType, sizeof(T), data, usage);
-    }
+        => glBufferData(targetType, sizeof(T), data, usage);
 
     public static void BufferSubData(BufferType targetType, int offset, int size, void* data)
         => glBufferSubData(targetType, offset, size, data);
 
-    public static void VertexAttribPointer(uint index, int size, DataType type, bool normalized, int stride, void* pointer)
-        => glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+    public static void VertexAttribPointer(uint index, int size, DataType type, bool normalize, int stride, void* pointer)
+        => glVertexAttribPointer(index, size, type, normalize, stride, pointer);
 
     public static void VertexAttribIPointer(uint index, int size, DataType type, int stride, void* pointer)
         => glVertexAttribIPointer(index, size, type, stride, pointer);
@@ -201,21 +176,6 @@ public unsafe static class GL
     public static void DeleteProgram(uint program)
         => glDeleteProgram(program);
 
-    public static void Uniform(int index, int value)
-        => glUniform1i(index, value);
-
-    public static void Uniform(int index, float value)
-        => glUniform1f(index, value);
-
-    public static void Uniform(int index, float value1, float value2)
-        => glUniform2f(index, value1, value2);
-
-    public static void Uniform(int index, float value1, float value2, float value3)
-        => glUniform3f(index, value1, value2, value3);
-
-    public static void Uniform(int index, float value1, float value2, float value3, float value4)
-        => glUniform4f(index, value1, value2, value3, value4);
-
     public static void PushDebugGroup(DebugSource source, uint id, int length, byte* message)
         => glPushDebugGroup(source, id, length, message);
 
@@ -228,230 +188,230 @@ public unsafe static class GL
     public static void PushDebugGroup(DebugSource source, uint id, ReadOnlySpan<byte> message)
     {
         fixed (byte* messagePointer = message)
-            PushDebugGroup(source, id, -1, messagePointer);
+            glPushDebugGroup(source, id, -1, messagePointer);
     }
 
-    [DllImport(gl, EntryPoint = "glBindTexture"), SuppressGCTransition]
-    public static extern void BindTexture(TexPTarget target, uint texture);
+    #region Imports
+    [LibraryImport(gl, EntryPoint = "glBindTexture"), SuppressGCTransition] public static partial 
+        void BindTexture(TextureParameterTarget target, uint texture);
 
-    [DllImport(gl, EntryPoint = "glBlendFunc"), SuppressGCTransition]
-    public static extern void BlendFunc(FactorEnum sfactor, FactorEnum dfactor);
+    [LibraryImport(gl, EntryPoint = "glBlendFunc"), SuppressGCTransition] public static partial 
+        void BlendFunc(FactorEnum sourceFactor, FactorEnum destinationFactor);
 
-    [DllImport(gl, EntryPoint = "glClear"), SuppressGCTransition]
-    public static extern void Clear(ClearMask mask);
+    [LibraryImport(gl, EntryPoint = "glClear"), SuppressGCTransition] public static partial 
+        void Clear(ClearMask mask);
 
-    [DllImport(gl, EntryPoint = "glClearColor"), SuppressGCTransition]
-    public static extern void ClearColor(float red, float green, float blue, float alpha);
+    [LibraryImport(gl, EntryPoint = "glClearColor"), SuppressGCTransition] public static partial 
+        void ClearColor(float red, float green, float blue, float alpha);
 
-    [DllImport(gl, EntryPoint = "glClearDepth"), SuppressGCTransition]
-    public static extern void ClearDepth(double depth);
+    [LibraryImport(gl, EntryPoint = "glClearDepth"), SuppressGCTransition] public static partial 
+        void ClearDepth(double depth);
 
-    [DllImport(gl, EntryPoint = "glClearStencil"), SuppressGCTransition]
-    public static extern void ClearStencil(int s);
+    [LibraryImport(gl, EntryPoint = "glClearStencil"), SuppressGCTransition] public static partial 
+        void ClearStencil(int stencil);
 
-    [DllImport(gl, EntryPoint = "glColorMask"), SuppressGCTransition]
-    public static extern void ColorMask(byte red, byte green, byte blue, byte alpha);
+    [LibraryImport(gl, EntryPoint = "glColorMask"), SuppressGCTransition] public static partial 
+        void ColorMask(byte red, byte green, byte blue, byte alpha);
 
-    [DllImport(gl, EntryPoint = "glCopyTexImage1D"), SuppressGCTransition]
-    public static extern void CopyTexImage1D(TexPTarget target, int level, InternalFormat internalFormat, int x, int y, int width, int border);
+    [LibraryImport(gl, EntryPoint = "glCopyTexImage1D"), SuppressGCTransition] public static partial 
+        void CopyTextureImage1D(TextureParameterTarget target, int level, InternalFormat internalFormat, int x, int y, int width, int border);
 
-    [DllImport(gl, EntryPoint = "glCopyTexImage2D"), SuppressGCTransition]
-    public static extern void CopyTexImage2D(TexPTarget target, int level, InternalFormat internalFormat, int x, int y, int width, int height, int border);
+    [LibraryImport(gl, EntryPoint = "glCopyTexImage2D"), SuppressGCTransition] public static partial 
+        void CopyTextureImage2D(TextureParameterTarget target, int level, InternalFormat internalFormat, int x, int y, int width, int height, int border);
 
-    [DllImport(gl, EntryPoint = "glCopyTexSubImage1D"), SuppressGCTransition]
-    public static extern void CopyTexSubImage1D(TexPTarget target, int level, int xoffset, int x, int y, int width);
+    [LibraryImport(gl, EntryPoint = "glCopyTexSubImage1D"), SuppressGCTransition] public static partial 
+        void CopyTextureSubImage1D(TextureParameterTarget target, int level, int xoffset, int x, int y, int width);
 
-    [DllImport(gl, EntryPoint = "glCopyTexSubImage2D"), SuppressGCTransition]
-    public static extern void CopyTexSubImage2D(TexPTarget target, int level, int xoffset, int yoffset, int x, int y, int width, int height);
+    [LibraryImport(gl, EntryPoint = "glCopyTexSubImage2D"), SuppressGCTransition] public static partial 
+        void CopyTextureSubImage2D(TextureParameterTarget target, int level, int xoffset, int yoffset, int x, int y, int width, int height);
 
-    [DllImport(gl, EntryPoint = "glCullFace"), SuppressGCTransition]
-    public static extern void CullFace(FaceEnum mode);
+    [LibraryImport(gl, EntryPoint = "glCullFace"), SuppressGCTransition] public static partial 
+        void CullFace(FaceEnum mode);
 
-    [DllImport(gl, EntryPoint = "glDeleteTextures"), SuppressGCTransition]
-    public static extern void DeleteTextures(uint n, uint* textures);
+    [LibraryImport(gl, EntryPoint = "glDeleteTextures"), SuppressGCTransition] public static partial 
+        void DeleteTextures(uint count, uint* textures);
 
-    [DllImport(gl, EntryPoint = "glDepthFunc"), SuppressGCTransition]
-    public static extern void DepthFunc(Func func);
+    [LibraryImport(gl, EntryPoint = "glDepthFunc"), SuppressGCTransition] public static partial 
+        void DepthFunc(TestFunction testFunction);
 
-    [DllImport(gl, EntryPoint = "glDepthMask"), SuppressGCTransition]
-    public static extern void DepthMask(byte flag);
+    [LibraryImport(gl, EntryPoint = "glDepthMask"), SuppressGCTransition] public static partial 
+        void DepthMask(byte flag);
 
-    [DllImport(gl, EntryPoint = "glDepthRange"), SuppressGCTransition]
-    public static extern void DepthRange(double zNear, double zFar);
+    [LibraryImport(gl, EntryPoint = "glDepthRange"), SuppressGCTransition] public static partial 
+        void DepthRange(double zNear, double zFar);
 
-    [DllImport(gl, EntryPoint = "glDisable"), SuppressGCTransition]
-    public static extern void Disable(Cap cap);
+    [LibraryImport(gl, EntryPoint = "glDisable"), SuppressGCTransition] public static partial 
+        void Disable(StateCap cap);
 
-    [DllImport(gl, EntryPoint = "glDrawArrays"), SuppressGCTransition]
-    public static extern void DrawArrays(Mode mode, int first, int count);
+    [LibraryImport(gl, EntryPoint = "glDrawArrays"), SuppressGCTransition] public static partial 
+        void DrawArrays(DrawMode mode, int first, int count);
 
-    [DllImport(gl, EntryPoint = "glDrawBuffer"), SuppressGCTransition]
-    public static extern void DrawBuffer(Mode mode);
+    [LibraryImport(gl, EntryPoint = "glDrawBuffer"), SuppressGCTransition] public static partial 
+        void DrawBuffer(DrawMode mode);
 
-    [DllImport(gl, EntryPoint = "glDrawElements"), SuppressGCTransition]
-    public static extern void DrawElements(Mode mode, int count, BUType type, nint offset);
+    [LibraryImport(gl, EntryPoint = "glDrawElements"), SuppressGCTransition] public static partial 
+        void DrawElements(DrawMode mode, int count, ElementIndexType type, nint offset);
 
-    [DllImport(gl, EntryPoint = "glEdgeFlag"), SuppressGCTransition]
-    public static extern void EdgeFlag(byte flag);
+    [LibraryImport(gl, EntryPoint = "glEdgeFlag"), SuppressGCTransition] public static partial 
+        void EdgeFlag(byte flag);
 
-    [DllImport(gl, EntryPoint = "glEnable"), SuppressGCTransition]
-    public static extern void Enable(Cap cap);
+    [LibraryImport(gl, EntryPoint = "glEnable"), SuppressGCTransition] public static partial 
+        void Enable(StateCap cap);
 
-    [DllImport(gl, EntryPoint = "glFinish"), SuppressGCTransition]
-    public static extern void Finish();
+    [LibraryImport(gl, EntryPoint = "glFinish"), SuppressGCTransition] public static partial 
+        void Finish();
 
-    [DllImport(gl, EntryPoint = "glFlush"), SuppressGCTransition]
-    public static extern void Flush();
+    [LibraryImport(gl, EntryPoint = "glFlush"), SuppressGCTransition] public static partial 
+        void Flush();
 
-    [DllImport(gl, EntryPoint = "glFrontFace"), SuppressGCTransition]
-    public static extern void FrontFace(FaceMode mode);
+    [LibraryImport(gl, EntryPoint = "glFrontFace"), SuppressGCTransition] public static partial 
+        void FrontFace(FaceMode mode);
 
-    [DllImport(gl, EntryPoint = "glGenTextures"), SuppressGCTransition]
-    public static extern void GenTextures(uint n, uint* textures);
+    [LibraryImport(gl, EntryPoint = "glGenTextures"), SuppressGCTransition] public static partial 
+        void GenerateTextures(uint count, uint* textures);
 
-    [DllImport(gl, EntryPoint = "glGetBooleanv"), SuppressGCTransition]
-    public static extern void GetBoolean(PName pname, byte* @params);
+    [LibraryImport(gl, EntryPoint = "glGetBooleanv"), SuppressGCTransition] public static partial 
+        void GetBoolean(ParameterName pname, byte* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetDoublev"), SuppressGCTransition]
-    public static extern void GetDouble(PName pname, double* @params);
+    [LibraryImport(gl, EntryPoint = "glGetDoublev"), SuppressGCTransition] public static partial 
+        void GetDouble(ParameterName pname, double* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetError"), SuppressGCTransition]
-    public static extern Status GetError();
+    [LibraryImport(gl, EntryPoint = "glGetError"), SuppressGCTransition] public static partial 
+        ErrorStatus GetError();
 
-    [DllImport(gl, EntryPoint = "glGetFloatv"), SuppressGCTransition]
-    public static extern void GetFloat(PName pname, float* @params);
+    [LibraryImport(gl, EntryPoint = "glGetFloatv"), SuppressGCTransition] public static partial 
+        void GetFloat(ParameterName pname, float* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetIntegerv"), SuppressGCTransition]
-    public static extern void GetInteger(PName pname, int* @params);
+    [LibraryImport(gl, EntryPoint = "glGetIntegerv"), SuppressGCTransition] public static partial 
+        void GetInteger(ParameterName pname, int* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetString"), SuppressGCTransition]
-    public static extern byte* GetString(StringName name);
+    [LibraryImport(gl, EntryPoint = "glGetString"), SuppressGCTransition] public static partial 
+        byte* GetString(StringName name);
 
-    [DllImport(gl, EntryPoint = "glGetTexImage"), SuppressGCTransition]
-    public static extern void GetTexImage(TexTarget target, int level, ImagePixelType format, BType type, nint pixels);
+    [LibraryImport(gl, EntryPoint = "glGetTexImage"), SuppressGCTransition] public static partial 
+        void GetTextureImage(TextureTarget target, int level, ImagePixelType format, ImageDataType type, nint pixels);
 
-    [DllImport(gl, EntryPoint = "glGetTexLevelParameterfv"), SuppressGCTransition]
-    public static extern void GetTexLevelParameter(TexPTarget target, int level, TexN pname, float* @params);
+    [LibraryImport(gl, EntryPoint = "glGetTexLevelParameterfv"), SuppressGCTransition] public static partial 
+        void GetTextureLevelParameter(TextureParameterTarget target, int level, TextureLevelParameter parameterName, float* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetTexLevelParameteriv"), SuppressGCTransition]
-    public static extern void GetTexLevelParameter(TexPTarget target, int level, TexN pname, int* @params);
+    [LibraryImport(gl, EntryPoint = "glGetTexLevelParameteriv"), SuppressGCTransition] public static partial 
+        void GetTextureLevelParameter(TextureParameterTarget target, int level, TextureLevelParameter parameterName, int* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetTexParameterfv"), SuppressGCTransition]
-    public static extern void GetTexParameter(TexTarget target, TexNV pname, float* @params);
+    [LibraryImport(gl, EntryPoint = "glGetTexParameterfv"), SuppressGCTransition] public static partial 
+        void GetTextureParameter(TextureTarget target, TextureLevelParameter2 parameterName, float* parameters);
 
-    [DllImport(gl, EntryPoint = "glGetTexParameteriv"), SuppressGCTransition]
-    public static extern void GetTexParameter(TexTarget target, TexNV pname, int* @params);
+    [LibraryImport(gl, EntryPoint = "glGetTexParameteriv"), SuppressGCTransition] public static partial 
+        void GetTextureParameter(TextureTarget target, TextureLevelParameter2 parameterName, int* parameters);
 
-    [DllImport(gl, EntryPoint = "glHint"), SuppressGCTransition]
-    public static extern void Hint(Hint target, CalcType mode);
+    [LibraryImport(gl, EntryPoint = "glHint"), SuppressGCTransition] public static partial 
+        void Hint(GLHint target, CalcType mode);
 
-    [DllImport(gl, EntryPoint = "glIsEnabled"), SuppressGCTransition]
-    public static extern bool IsEnabled(Cap cap);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "glIsEnabled"), SuppressGCTransition] public static partial 
+        bool IsEnabled(StateCap cap);
 
-    [DllImport(gl, EntryPoint = "glIsTexture"), SuppressGCTransition]
-    public static extern byte IsTexture(uint texture);
+    [LibraryImport(gl, EntryPoint = "glIsTexture"), SuppressGCTransition] public static partial 
+        byte IsTexture(uint texture);
 
-    [DllImport(gl, EntryPoint = "glLineWidth"), SuppressGCTransition]
-    public static extern void LineWidth(float width);
+    [LibraryImport(gl, EntryPoint = "glLineWidth"), SuppressGCTransition] public static partial 
+        void LineWidth(float width);
 
-    [DllImport(gl, EntryPoint = "glLogicOp"), SuppressGCTransition]
-    public static extern void LogicOp(OpCode opcode);
+    [LibraryImport(gl, EntryPoint = "glLogicOp"), SuppressGCTransition] public static partial 
+        void LogicOp(LogicOpCode opcode);
 
-    [DllImport(gl, EntryPoint = "glPixelStoref"), SuppressGCTransition]
-    public static extern void PixelStore(StoreN pname, float param);
+    [LibraryImport(gl, EntryPoint = "glPixelStoref"), SuppressGCTransition] public static partial 
+        void PixelStore(ParameterPixelStore pname, float parameter);
 
-    [DllImport(gl, EntryPoint = "glPixelStorei"), SuppressGCTransition]
-    public static extern void PixelStore(StoreN pname, int param);
+    [LibraryImport(gl, EntryPoint = "glPixelStorei"), SuppressGCTransition] public static partial 
+        void PixelStore(ParameterPixelStore pname, int parameter);
 
-    [DllImport(gl, EntryPoint = "glPointSize"), SuppressGCTransition]
-    public static extern void PointSize(float size);
+    [LibraryImport(gl, EntryPoint = "glPointSize"), SuppressGCTransition] public static partial 
+        void PointSize(float size);
 
-    [DllImport(gl, EntryPoint = "glPolygonMode"), SuppressGCTransition]
-    public static extern void PolygonMode(MaterialFace face, MeshType mode);
+    [LibraryImport(gl, EntryPoint = "glPolygonMode"), SuppressGCTransition] public static partial 
+        void PolygonMode(MaterialFace face, MeshType mode);
 
-    [DllImport(gl, EntryPoint = "glPolygonOffset"), SuppressGCTransition]
-    public static extern void PolygonOffset(float factor, float units);
+    [LibraryImport(gl, EntryPoint = "glPolygonOffset"), SuppressGCTransition] public static partial 
+        void PolygonOffset(float factor, float units);
 
-    [DllImport(gl, EntryPoint = "glReadBuffer"), SuppressGCTransition]
-    public static extern void ReadBuffer(BufType mode);
+    [LibraryImport(gl, EntryPoint = "glReadBuffer"), SuppressGCTransition] public static partial 
+        void ReadBuffer(ReadBufferType mode);
 
-    [DllImport(gl, EntryPoint = "glReadPixels"), SuppressGCTransition]
-    public static extern void ReadPixels(int x, int y, int width, int height, ImagePixelType format, ReadType type, nint pixels);
+    [LibraryImport(gl, EntryPoint = "glReadPixels"), SuppressGCTransition] public static partial 
+        void ReadPixels(int x, int y, int width, int height, ImagePixelType format, ReadType type, nint pixels);
 
-    [DllImport(gl, EntryPoint = "glScissor"), SuppressGCTransition]
-    public static extern void Scissor(int x, int y, int width, int height);
+    [LibraryImport(gl, EntryPoint = "glScissor"), SuppressGCTransition] public static partial 
+        void Scissor(int x, int y, int width, int height);
 
-    [DllImport(gl, EntryPoint = "glStencilFunc"), SuppressGCTransition]
-    public static extern void StencilFunc(Func func, int @ref, uint mask);
+    [LibraryImport(gl, EntryPoint = "glStencilFunc"), SuppressGCTransition] public static partial 
+        void StencilFunc(TestFunction func, int @ref, uint mask);
 
-    [DllImport(gl, EntryPoint = "glStencilMask"), SuppressGCTransition]
-    public static extern void StencilMask(uint mask);
+    [LibraryImport(gl, EntryPoint = "glStencilMask"), SuppressGCTransition] public static partial 
+        void StencilMask(uint mask);
 
-    [DllImport(gl, EntryPoint = "glStencilOp"), SuppressGCTransition]
-    public static extern void StencilOp(FailType fail, FailType zfail, FailType zpass);
+    [LibraryImport(gl, EntryPoint = "glStencilOp"), SuppressGCTransition] public static partial 
+        void StencilOp(FailType fail, FailType zFail, FailType zPass);
 
-    [DllImport(gl, EntryPoint = "glTexImage1D"), SuppressGCTransition]
-    public static extern void TexImage(Tex1DTarget target, int level, InternalFormat internalformat, int width, int border, ImageFormat format, ImageType type, void* pixels);
+    [LibraryImport(gl, EntryPoint = "glTexImage1D"), SuppressGCTransition] public static partial 
+        void TextureImage(Texture1DTarget target, int level, InternalFormat internalformat, int width, int border, ImageFormat format, ImageType type, void* pixels);
 
-    [DllImport(gl, EntryPoint = "glTexImage2D"), SuppressGCTransition]
-    public static extern void TexImage(Tex2DTarget target, int level, InternalFormat internalformat, int width, int height, int border, ImageFormat format, ImageType type, void* pixels);
+    [LibraryImport(gl, EntryPoint = "glTexImage2D"), SuppressGCTransition] public static partial 
+        void TextureImage(Texture2DTarget target, int level, InternalFormat internalformat, int width, int height, int border, ImageFormat format, ImageType type, void* pixels);
 
-    [DllImport(gl, EntryPoint = "glTexParameterf"), SuppressGCTransition]
-    public static extern void TexParameter(TexTarget target, TexNV2 pname, float param);
+    [LibraryImport(gl, EntryPoint = "glTexParameterf"), SuppressGCTransition] public static partial 
+        void TextureParameter(TextureTarget target, TextureLevelParameter3 pname, float param);
 
-    [DllImport(gl, EntryPoint = "glTexParameterfv"), SuppressGCTransition]
-    public static extern void TexParameter(TexTarget target, TexNV2 pname, float* @params);
+    [LibraryImport(gl, EntryPoint = "glTexParameterfv"), SuppressGCTransition] public static partial 
+        void TextureParameter(TextureTarget target, TextureLevelParameter3 pname, float* @params);
 
-    [DllImport(gl, EntryPoint = "glTexParameteri"), SuppressGCTransition]
-    public static extern void TexParameter(TexTarget target, TexNV2 pname, int param);
+    [LibraryImport(gl, EntryPoint = "glTexParameteri"), SuppressGCTransition] public static partial 
+        void TextureParameter(TextureTarget target, TextureLevelParameter3 pname, int param);
 
-    [DllImport(gl, EntryPoint = "glTexParameteriv"), SuppressGCTransition]
-    public static extern void TexParameter(TexTarget target, TexNV2 pname, int* @params);
+    [LibraryImport(gl, EntryPoint = "glTexParameteriv"), SuppressGCTransition] public static partial 
+        void TextureParameter(TextureTarget target, TextureLevelParameter3 pname, int* @params);
 
-    [DllImport(gl, EntryPoint = "glTexSubImage1D"), SuppressGCTransition]
-    public static extern void TexSubImage(Tex1DTarget target, int level, int xoffset, int width, ImageFormat format, ImageType type, void* pixels);
+    [LibraryImport(gl, EntryPoint = "glTexSubImage1D"), SuppressGCTransition] public static partial 
+        void TextureSubImage(Texture1DTarget target, int level, int xoffset, int width, ImageFormat format, ImageType type, void* pixels);
 
-    [DllImport(gl, EntryPoint = "glTexSubImage2D"), SuppressGCTransition]
-    public static extern void TexSubImage(Tex2DTarget target, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels);
+    [LibraryImport(gl, EntryPoint = "glTexSubImage2D"), SuppressGCTransition] public static partial 
+        void TexSubImage(Texture2DTarget target, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels);
 
-    [DllImport(gl, EntryPoint = "glViewport"), SuppressGCTransition]
-    public static extern void Viewport(int x, int y, int width, int height);
+    [LibraryImport(gl, EntryPoint = "glViewport"), SuppressGCTransition] public static partial 
+        void Viewport(int x, int y, int width, int height);
 
-    [DllImport(gl, EntryPoint = "wglCopyContext"), SuppressGCTransition]
-    public static extern bool CopyContext(nint source, nint dest, uint mask);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "wglCopyContext"), SuppressGCTransition] public static partial 
+        bool CopyContext(nint source, nint dest, uint mask);
 
-    [DllImport(gl, EntryPoint = "wglCreateContext"), SuppressGCTransition]
-    public static extern nint CreateContext(nint hdc);
+    [LibraryImport(gl, EntryPoint = "wglCreateContext"), SuppressGCTransition] public static partial 
+        nint CreateContext(nint hdc);
 
-    [DllImport(gl, EntryPoint = "wglCreateLayerContext"), SuppressGCTransition]
-    public static extern nint CreateLayerContext(nint hdc, int layerPlane);
+    [LibraryImport(gl, EntryPoint = "wglCreateLayerContext"), SuppressGCTransition] public static partial 
+        nint CreateLayerContext(nint hdc, int layerPlane);
 
-    [DllImport(gl, EntryPoint = "wglDeleteContext"), SuppressGCTransition]
-    public static extern bool DeleteContext(nint context);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "wglDeleteContext"), SuppressGCTransition] public static partial 
+        bool DeleteContext(nint context);
 
-    [DllImport(gl, EntryPoint = "wglGetCurrentContext"), SuppressGCTransition]
-    public static extern nint GetCurrentContext();
+    [LibraryImport(gl, EntryPoint = "wglGetCurrentContext"), SuppressGCTransition] public static partial 
+        nint GetCurrentContext();
 
-    [DllImport(gl, EntryPoint = "wglGetCurrentDC"), SuppressGCTransition]
-    public static extern nint GetCurrentDC();
+    [LibraryImport(gl, EntryPoint = "wglGetCurrentDC"), SuppressGCTransition] public static partial 
+        nint GetCurrentDC();
 
-    [DllImport(gl, EntryPoint = "wglGetProcAddress"), SuppressGCTransition]
-    public static extern nint GetProcAddress(byte* name);
+    [LibraryImport(gl, EntryPoint = "wglGetProcAddress"), SuppressGCTransition] public static partial 
+        nint GetProcAddress(byte* name);
 
-    [DllImport(gl, EntryPoint = "wglMakeCurrent"), SuppressGCTransition]
-    public static extern bool MakeCurrent(nint hdc, nint context);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "wglMakeCurrent"), SuppressGCTransition] public static partial 
+        bool MakeCurrent(nint hdc, nint context);
 
-    [DllImport(gl, EntryPoint = "wglShareLists"), SuppressGCTransition]
-    public static extern bool ShareLists(nint context1, nint context2);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "wglShareLists"), SuppressGCTransition] public static partial 
+        bool ShareLists(nint context1, nint context2);
 
-    [DllImport(gl, EntryPoint = "wglSwapBuffers"), SuppressGCTransition]
-    public static extern bool SwapBuffers(nint hdc);
-
-    static GL()
-    {
-        if (Kernel32.LoadLibrary("opengl32"u8) == 0)
-            throw null!;
-    }
-
-    const string gl = "opengl32";
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [LibraryImport(gl, EntryPoint = "wglSwapBuffers"), SuppressGCTransition] public static partial 
+        bool SwapBuffers(nint hdc);
+    #endregion
 }

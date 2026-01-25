@@ -1,5 +1,4 @@
 ﻿using OpenGL;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
@@ -11,7 +10,7 @@ public unsafe struct GlTexture1D
 
     public void Bind()
     {
-        GL.BindTexture(TexPTarget.Texture1D, ID);
+        GL.BindTexture(TextureParameterTarget.Texture1D, ID);
     }
 
     public void Active(uint index)
@@ -25,26 +24,26 @@ public unsafe struct GlTexture1D
     public void Allocate(int width)
     {
         Bind();
-        GL.TexImage(Tex1DTarget.Texture, 0, InternalFormat.RGBA8, width, 0, ImageFormat.RGBA, ImageType.UByte, null);
+        GL.TextureImage(Texture1DTarget.Texture, 0, InternalFormat.RGBA8, width, 0, ImageFormat.RGBA, ImageType.UByte, null);
     }
 
     public void Write(void* pixels, int offset, int width)
     {
-        GL.TexSubImage(Tex1DTarget.Texture, 0, offset, width, ImageFormat.RGBA, ImageType.UByte, pixels);
+        GL.TextureSubImage(Texture1DTarget.Texture, 0, offset, width, ImageFormat.RGBA, ImageType.UByte, pixels);
     }
 
     void SetupParameters()
     {
         const int GL_NEAREST = 0x2600;
 
-        GL.TexParameter(TexTarget.Texture1D, TexNV2.MinFilter, GL_NEAREST);
-        GL.TexParameter(TexTarget.Texture1D, TexNV2.MagFilter, GL_NEAREST);
+        GL.TextureParameter(TextureTarget.Texture1D, TextureLevelParameter3.MinFilter, GL_NEAREST);
+        GL.TextureParameter(TextureTarget.Texture1D, TextureLevelParameter3.MagFilter, GL_NEAREST);
     }
 
     public static GlTexture1D Create()
     {
         GlTexture1D texture;
-        GL.GenTextures(1, (uint*)&texture);
+        GL.GenerateTextures(1, (uint*)&texture);
         texture.SetupParameters();
 
         return texture;
@@ -61,7 +60,7 @@ public unsafe struct GlTexture1D
     {
         var count = textures.Length;
         var ids = stackalloc uint[count];
-        GL.GenTextures((uint)count, ids);
+        GL.GenerateTextures((uint)count, ids);
         fixed (nint* texturesPointer = textures)
         {
             for (var index = 0; index < count; index++)

@@ -1,6 +1,6 @@
 ﻿using DebugProfiler;
+using OpenGL;
 using System.Drawing;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 

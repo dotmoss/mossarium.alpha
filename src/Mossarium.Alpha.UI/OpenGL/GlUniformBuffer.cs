@@ -1,4 +1,5 @@
-﻿using static OpenGL.Enums;
+﻿
+using OpenGL;
 
 namespace Mossarium.Alpha.UI.OpenGL;
 

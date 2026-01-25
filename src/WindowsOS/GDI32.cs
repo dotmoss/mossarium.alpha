@@ -6,7 +6,7 @@ public static unsafe partial class GDI32
 {
     const string gdi = "gdi32";
 
-    #region DllImports
+    #region Imports
     [LibraryImport(gdi), SuppressGCTransition] public static partial
         nint GetStockObject(StockObjects fnObject);
 

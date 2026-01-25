@@ -4,7 +4,7 @@ public unsafe static partial class FreeType
 {
     const string freetype = "freetype";
 
-    #region DllImports
+    #region Imports
     [LibraryImport(freetype), SuppressGCTransition] public static partial
         FT_Error FT_Init_FreeType(FT_Library* library);
 

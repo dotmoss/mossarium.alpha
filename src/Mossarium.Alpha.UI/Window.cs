@@ -6,7 +6,6 @@ using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
 using System.Runtime.InteropServices;
 using WindowsOS;
-using static OpenGL.Enums;
 
 namespace Mossarium.Alpha.UI;
 
@@ -171,10 +170,10 @@ void main() {
 
         atlas.Active(0);
 
-        GL.DrawArrays(Mode.Points, 0, 2);
+        GL.DrawArrays(DrawMode.Points, 0, 2);
 
         GlPrograms.TransparentWindowCorners.Use();
-        GL.DrawArrays(Mode.Triangles, 0, 12);
+        GL.DrawArrays(DrawMode.Triangles, 0, 12);
 
         GDI32.SwapBuffers(DeviceContextHandle);
     }
