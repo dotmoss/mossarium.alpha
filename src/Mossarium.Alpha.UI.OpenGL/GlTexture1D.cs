@@ -30,7 +30,7 @@ public unsafe struct GlTexture1D
 
     public void Write(void* pixels, int offset, int width)
     {
-        GL.TexSubImage(0, offset, width, ImageFormat.RGBA, ImageType.UByte, pixels);
+        GL.TexSubImage(Tex1DTarget.Texture, 0, offset, width, ImageFormat.RGBA, ImageType.UByte, pixels);
     }
 
     void SetupParameters()
