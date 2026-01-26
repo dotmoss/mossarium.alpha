@@ -16,8 +16,8 @@ public static unsafe class GlUniformBufferRegistry
         var buffers = stackalloc uint[Count];
         GL.GenerateBuffers(Count, buffers);
 
-        WindowData = new GlUniformBuffer<UbWindowData>(buffers[0]);
-        RoundedRectangleData = new GlUniformBuffer<UbRoundedRectangleData>(buffers[1]);
+        WindowData = new GlUniformBuffer<UbWindowData>(buffers[0], 0);
+        RoundedRectangleData = new GlUniformBuffer<UbRoundedRectangleData>(buffers[1], 1);
 
         Profiler.Pop();
     }

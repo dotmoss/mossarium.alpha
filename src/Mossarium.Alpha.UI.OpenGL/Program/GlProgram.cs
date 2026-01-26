@@ -2,24 +2,22 @@
 
 namespace Mossarium.Alpha.UI.OpenGL;
 
-public unsafe struct GlProgram : IDisposable
+public unsafe struct GlProgram : IObjectHandle
 {
     public GlProgram(params ReadOnlySpan<GlShader> shaders)
     {
-        var programId = GL.CreateProgram();
+        ID = GL.CreateProgram();
         for (var shaderIndex = 0; shaderIndex < shaders.Length; shaderIndex++)
-            GL.AttachShader(programId, shaders[shaderIndex].ID);
+            shaders[shaderIndex].AttachToProgram(this);
         
-        GL.LinkProgram(programId);
+        GL.LinkProgram(ID);
 
 #if DEBUG
         bool isSuccess;
-        GL.GetProgramLinkStatus(programId, &isSuccess);
+        GL.GetProgramLinkStatus(ID, &isSuccess);
         if (!isSuccess)
             throw null!;
 #endif
-
-        ID = programId;
     }
 
     public uint ID { get; private set; }

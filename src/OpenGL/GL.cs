@@ -114,8 +114,8 @@ public unsafe static partial class GL
     public static void DeleteVertexArray(uint count, uint* ids)
         => glDeleteVertexArray(count, ids);
 
-    public static void BindBuffer(BufferType targetType, uint arrayId)
-        => glBindBuffer(targetType, arrayId);
+    public static void BindBuffer(BufferType targetType, uint bufferId)
+        => glBindBuffer(targetType, bufferId);
 
     public static void BufferData(BufferType targetType, int size, void* data, BufferUsage usage)
         => glBufferData(targetType, size, data, usage);
@@ -229,7 +229,7 @@ public unsafe static partial class GL
         void CullFace(FaceEnum mode);
 
     [LibraryImport(gl, EntryPoint = "glDeleteTextures"), SuppressGCTransition] public static partial 
-        void DeleteTextures(uint count, uint* textures);
+        void DeleteTextures(uint count, uint* textureIds);
 
     [LibraryImport(gl, EntryPoint = "glDepthFunc"), SuppressGCTransition] public static partial 
         void DepthFunc(TestFunction testFunction);
@@ -374,7 +374,7 @@ public unsafe static partial class GL
         void TextureSubImage(Texture1DTarget target, int level, int xoffset, int width, ImageFormat format, ImageType type, void* pixels);
 
     [LibraryImport(gl, EntryPoint = "glTexSubImage2D"), SuppressGCTransition] public static partial 
-        void TexSubImage(Texture2DTarget target, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels);
+        void TextureSubImage(Texture2DTarget target, int level, int xoffset, int yoffset, int width, int height, ImageFormat format, ImageType type, void* pixels);
 
     [LibraryImport(gl, EntryPoint = "glViewport"), SuppressGCTransition] public static partial 
         void Viewport(int x, int y, int width, int height);

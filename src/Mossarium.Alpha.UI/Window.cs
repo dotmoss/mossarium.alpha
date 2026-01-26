@@ -26,11 +26,8 @@ public unsafe class Window : SystemWindow
 
     protected virtual void OnRendererInitialized()
     {
-        vertexArray = GlVertexArray<SpriteVertex, ushort>.Create();
-        vertexBuffer = GlBuffer.Create(BufferType.Array, BufferUsage.DynamicDraw);
-
-        vertexArray.Bind();
-        vertexBuffer.Bind();
+        vertexArray = new GlVertexArray();
+        vertexBuffer = vertexArray.DefineVertexBuffer<SpriteVertex>();
 
         ReadOnlySpan<SpriteVertex> vertexes =
         [
@@ -39,10 +36,7 @@ public unsafe class Window : SystemWindow
         ];
         vertexBuffer.Allocate(vertexes);
 
-        vertexArray.DescribeAttributes();
-
-        atlas = GlTexture1D.Create();
-        atlas.Allocate(2048 * 2048);
+        atlas = new GlTexture1D(2048, 2048);
 
         vertexShader = new GlShader(ShaderType.Vertex,
 @"#version 430 core
@@ -125,8 +119,8 @@ void main() {
         program = new GlProgram(vertexShader, geometryShader, fragmentShader);
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x14)]
-    struct SpriteVertex : IGlVertex<SpriteVertex>
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x20)]
+    struct SpriteVertex : IVertex<SpriteVertex>
     {
         public SpriteVertex(LocationF4 position, SizeF4 size, float imageOffset)
         {
@@ -139,18 +133,16 @@ void main() {
         public SizeF4 Size;
         public float ImageOffset;
 
-        public static void DesribeAttributes<TVertexImpl, TIndex>(GlVertexArray<TVertexImpl, TIndex> array)
-            where TVertexImpl : unmanaged, IGlVertex<TVertexImpl>
-            where TIndex : unmanaged
+        static void IVertex<SpriteVertex>.DesribeAttributes()
         {
-            IGlVertex<SpriteVertex>.DesribeFloatAttribute(0, 2, DataType.Float, false, 0);
-            IGlVertex<SpriteVertex>.DesribeFloatAttribute(1, 2, DataType.Float, false, sizeof(LocationF4));
-            IGlVertex<SpriteVertex>.DesribeFloatAttribute(2, 1, DataType.Float, false, sizeof(LocationF4) + sizeof(SizeF4));
+            IVertex<SpriteVertex>.DesribeFloatAttribute(0, 2, DataType.Float, false, 0);
+            IVertex<SpriteVertex>.DesribeFloatAttribute(1, 2, DataType.Float, false, sizeof(LocationF4));
+            IVertex<SpriteVertex>.DesribeFloatAttribute(2, 1, DataType.Float, false, sizeof(LocationF4) + sizeof(SizeF4));
         }
     }
 
-    GlVertexArray<SpriteVertex, ushort> vertexArray;
-    GlBuffer vertexBuffer;
+    GlVertexArray vertexArray;
+    GlArrayBuffer vertexBuffer;
     GlTexture1D atlas;
     GlShader vertexShader, geometryShader, fragmentShader;
     GlProgram program;
@@ -167,7 +159,6 @@ void main() {
         GlUniformBufferRegistry.WindowData.Write(ubWindowData);
 
         program.Use();
-
         atlas.Active(0);
 
         GL.DrawArrays(DrawMode.Points, 0, 2);
