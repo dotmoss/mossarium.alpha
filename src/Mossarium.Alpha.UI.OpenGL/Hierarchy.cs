@@ -31,7 +31,7 @@ public unsafe interface IVertex<TVertexImpl>
         GL.VertexAttribPointer(index, count, type, normilize, sizeof(TVertexImpl), (void*)offset);
     }
 
-    static void DesribeIntegerPointAttribute(uint index, int count, DataType type, int offset)
+    static void DesribeIntegerAttribute(uint index, int count, DataType type, int offset)
     {
         GL.EnableVertexAttribArray(index);
         GL.VertexAttribIPointer(index, count, type, sizeof(TVertexImpl), (void*)offset);

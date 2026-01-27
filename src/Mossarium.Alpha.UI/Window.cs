@@ -4,7 +4,6 @@ using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.Windowing;
 using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using WindowsOS;
 
@@ -32,8 +31,8 @@ public unsafe class Window : SystemWindow
 
         ReadOnlySpan<SpriteVertex> vertexes =
         [
-            new SpriteVertex((50.0f, 50.0f), (50f, 50f), 100),
-            new SpriteVertex((150.0f, 150.0f), (50f, 50f), 200)
+            new SpriteVertex((50, 50), (100, 100), 0),
+            new SpriteVertex((150, 150), (16, 16), 2000)
         ];
         vertexBuffer.Allocate(vertexes);
 
@@ -46,34 +45,43 @@ public unsafe class Window : SystemWindow
         for (var i = 0; i < 2048 * 2048 * 4; i += 4)
         {
             bytes[i] = (byte)(counter % byte.MaxValue);
-            bytes[i + 1] = (byte)(counter % byte.MaxValue / 2);
-            bytes[i + 2] = (byte)(counter % byte.MaxValue / 4);
+            bytes[i + 1] = (byte)(counter % byte.MaxValue);
+            bytes[i + 2] = (byte)(counter % byte.MaxValue);
             bytes[i + 3] = byte.MaxValue;
 
             counter++;
         }
 
         fixed (byte* bytesPointer = bytes)
-            atlas.Write(bytesPointer, 2048 * 2048, 0);
+            atlas.Write(bytesPointer, 2048 * 2048 * 4, 0);
 
         vertexShader = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
-layout (location = 0) in vec2 position;
-layout (location = 1) in vec2 size;
-layout (location = 2) in uint imageOffset;
-
-out VS_OUT 
+layout (std140, binding = 0) uniform WindowData
 {
-    vec2 size;
-    flat uint imageOffset;
+    vec2 winSize;
+    vec2 winSizeT;
+};
+
+layout (location = 0) in uint packPosition;
+layout (location = 1) in uint packSize;
+layout (location = 2) in uint texOffset;
+
+out VS_OUT
+{
+    uint packSize;
+    float texOffset;
 } vs_out;
 
 void main() 
 {
-    gl_Position = vec4(position, 0.0, 1.0); 
-    vs_out.size = size;
-    vs_out.imageOffset = imageOffset;
+    vec2 position = vec2(float(packPosition & 0xFFFFU), float(packPosition >> 16));
+    vec2 normPosition = position / winSize * 2.0 - 1.0;
+    gl_Position = vec4(normPosition, 0.0, 1.0);
+
+    vs_out.packSize = packSize;
+    vs_out.texOffset = float(texOffset);
 }"u8
         );
 
@@ -88,38 +96,42 @@ layout (std140, binding = 0) uniform WindowData
 
 in VS_OUT 
 {
-    vec2 size;
-    flat uint imageOffset;
+    uint packSize;
+    float texOffset;
 } gs_in[];
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
-flat out uint fTexIndex;
-
+out vec2 fTexCoords;
+ 
 void main() 
 {
-    vec2 pos = gl_in[0].gl_Position.xy;
-    vec2 size = gs_in[0].size;
-    uint offset = gs_in[0].imageOffset;
+    vec2 positionStart = gl_in[0].gl_Position.xy;
+    uint packSize = gs_in[0].packSize;
+    vec2 size = vec2(float(packSize & 0xFFFFU), float(packSize >> 16));
+    vec2 normSize = size / winSize * 2.0;
+    float texStart = gs_in[0].texOffset;
 
-    uint uStart = offset;
-    uint uEnd = uStart + uint(size.x * size.y);
+    vec2 positionEnd = positionStart + normSize;
+
+    float texLength = size.x * size.y;
+    float texEnd = texStart + texLength;
     
-    gl_Position = vec4(pos.x / winSize.x * 2.0 - 1.0, pos.y / winSize.y * 2.0 - 1.0, 0.0, 1.0);
-    fTexIndex = uStart;
+    gl_Position = vec4(positionStart, 0.0, 1.0);
+    fTexCoords = vec2(texStart, 0);
     EmitVertex();
 
-    gl_Position = vec4((pos.x + size.x) / winSize.x * 2.0 - 1.0, pos.y / winSize.y * 2.0 - 1.0, 0.0, 1.0);
-    fTexIndex = uEnd;
+    gl_Position = vec4(positionEnd.x, positionStart.y, 0.0, 1.0);
+    fTexCoords = vec2(texStart, size.x);
     EmitVertex();
 
-    gl_Position = vec4(pos.x / winSize.x * 2.0 - 1.0, (pos.y + size.y) / winSize.y * 2.0 - 1.0, 0.0, 1.0);
-    fTexIndex = uStart;
+    gl_Position = vec4(positionStart.x, positionEnd.y, 0.0, 1.0);
+    fTexCoords = vec2(texEnd, 0);
     EmitVertex();
 
-    gl_Position = vec4((pos.x + size.x) / winSize.x * 2.0 - 1.0, (pos.y + size.y) / winSize.y * 2.0 - 1.0, 0.0, 1.0);
-    fTexIndex = uEnd;
+    gl_Position = vec4(positionEnd, 0.0, 1.0);
+    fTexCoords = vec2(texEnd, size.x);
     EmitVertex();
 
     EndPrimitive();
@@ -129,13 +141,14 @@ void main()
         fragmentShader = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
-flat in uint fTexIndex;
-out vec4 FragColor;
-
 layout(binding = 0) uniform samplerBuffer atlas;
 
+in vec2 fTexCoords;
+
+out vec4 FragColor;
+
 void main() {
-    FragColor = texelFetch(atlas, int(fTexIndex));
+    FragColor = texelFetch(atlas, int(fTexCoords.x + fTexCoords.y));
 }"u8
         );
 
@@ -144,25 +157,25 @@ void main() {
         emptyVertexArray = new GlVertexArray();
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x14)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x0C)]
     struct SpriteVertex : IVertex<SpriteVertex>
     {
-        public SpriteVertex(LocationF4 position, SizeF4 size, uint imageOffset)
+        public SpriteVertex(LocationU2 position, SizeU2 size, uint imageOffset)
         {
             Position = position;
             Size = size;
             ImageOffset = imageOffset;
         }
 
-        public LocationF4 Position;
-        public SizeF4 Size;
+        public LocationU2 Position;
+        public SizeU2 Size;
         public uint ImageOffset;
 
         static void IVertex<SpriteVertex>.DesribeAttributes()
         {
-            IVertex<SpriteVertex>.DesribeFloatAttribute(0, 2, DataType.Float, false, 0);
-            IVertex<SpriteVertex>.DesribeFloatAttribute(1, 2, DataType.Float, false, sizeof(LocationF4));
-            IVertex<SpriteVertex>.DesribeIntegerPointAttribute(2, 1, DataType.UInt, sizeof(LocationF4) + sizeof(SizeF4));
+            IVertex<SpriteVertex>.DesribeIntegerAttribute(0, 1, DataType.UInt, 0);
+            IVertex<SpriteVertex>.DesribeIntegerAttribute(1, 1, DataType.UInt, sizeof(LocationU2));
+            IVertex<SpriteVertex>.DesribeIntegerAttribute(2, 1, DataType.UInt, sizeof(LocationU2) + sizeof(SizeU2));
         }
     }
 
