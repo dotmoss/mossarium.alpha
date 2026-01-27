@@ -13,8 +13,6 @@ public unsafe struct GlVertexArray : IVertexArray
     }
 
     public uint ID { get; private set; }
-    public GlArrayBuffer ArrayBuffer { get; private set; }
-    public IElementArrayBuffer ElementArrayBuffer { get; private set; }
 
     public void Bind()
     {
@@ -25,18 +23,17 @@ public unsafe struct GlVertexArray : IVertexArray
         where TVertexImpl : unmanaged, IVertex<TVertexImpl>
     {
         Bind();
-        ArrayBuffer = new GlArrayBuffer();
-        ArrayBuffer.Bind();
+        var arrayBuffer = new GlArrayBuffer();
+        arrayBuffer.Bind();
 
         TVertexImpl.DesribeAttributes();
-        return ArrayBuffer;
+        return arrayBuffer;
     }
 
     public GlElementArrayBufferU2 DefineShortIndexBuffer()
     {
         Bind();
         var elementArrayBuffer = new GlElementArrayBufferU2();
-        ElementArrayBuffer = elementArrayBuffer;
         elementArrayBuffer.Bind();
 
         return elementArrayBuffer;
@@ -46,7 +43,6 @@ public unsafe struct GlVertexArray : IVertexArray
     {
         Bind();
         var elementArrayBuffer = new GlElementArrayBufferU4();
-        ElementArrayBuffer = elementArrayBuffer;
         elementArrayBuffer.Bind();
 
         return elementArrayBuffer;

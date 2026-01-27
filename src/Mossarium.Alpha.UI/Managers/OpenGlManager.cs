@@ -31,6 +31,7 @@ public unsafe static class OpenGlManager
 
     static void SetupInitialStates()
     {
+        GL.DepthMask(0);
         GL.Disable(StateCap.DepthTest);
         GL.Disable(StateCap.ScissorTest);
         GL.Disable(StateCap.StencilTest);

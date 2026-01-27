@@ -40,9 +40,6 @@ public unsafe interface IVertex<TVertexImpl>
 
 public unsafe interface IVertexArray : IObjectHandle
 {
-    GlArrayBuffer ArrayBuffer { get; }
-    IElementArrayBuffer ElementArrayBuffer { get; }
-
     void IDisposable.Dispose()
     {
         var id = ID;
@@ -54,3 +51,19 @@ public interface IElementArrayBuffer : IBufferHandle
 {
     ElementIndexType IndexType { get; }
 }
+
+public unsafe interface ITexture : IObjectHandle 
+{
+    TextureTarget Target { get; }
+    InternalFormat InternalFormat { get; }
+
+    void IDisposable.Dispose()
+    {
+        var id = ID;
+        GL.DeleteTextures(1, &id);
+    }
+}
+
+public unsafe interface ITexture1D : ITexture;
+
+public unsafe interface ITexture2D : ITexture;
