@@ -23,7 +23,7 @@ public unsafe interface IBufferHandle : INonFunctionalBufferHandle;
 public unsafe interface IVertex<TVertexImpl>
     where TVertexImpl : unmanaged, IVertex<TVertexImpl>
 {
-    static abstract void DesribeAttributes();
+    static abstract void DescribeAttributes();
 
     static void DesribeFloatAttribute(uint index, int count, DataType type, bool normilize, int offset)
     {

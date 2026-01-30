@@ -26,7 +26,7 @@ public unsafe struct GlVertexArray : IVertexArray
         var arrayBuffer = new GlArrayBuffer();
         arrayBuffer.Bind();
 
-        TVertexImpl.DesribeAttributes();
+        TVertexImpl.DescribeAttributes();
         return arrayBuffer;
     }
 

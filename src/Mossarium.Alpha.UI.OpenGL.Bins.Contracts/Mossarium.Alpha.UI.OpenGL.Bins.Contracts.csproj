@@ -4,22 +4,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
-    <ProjectReference Include="..\Mossarium.Alpha.UI.OpenGL.Bins.Contracts\Mossarium.Alpha.UI.OpenGL.Bins.Contracts.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="ModuleAttributes.cs">
       <Visible>false</Visible>
     </Compile>
-	<Compile Update="DebugProfiler.Stages.cs">
-	  <Visible>false</Visible>
-	</Compile>
   </ItemGroup>
 
 </Project>

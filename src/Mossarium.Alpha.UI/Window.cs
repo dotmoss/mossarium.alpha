@@ -64,24 +64,24 @@ layout (std140, binding = 0) uniform WindowData
     vec2 winSizeT;
 };
 
-layout (location = 0) in uint packPosition;
-layout (location = 1) in uint packSize;
-layout (location = 2) in uint texOffset;
+layout (location = 0) in uint inPackPosition;
+layout (location = 1) in uint inPackSize;
+layout (location = 2) in uint inTexOffset;
 
-out VS_OUT
+out outVS
 {
     uint packSize;
     float texOffset;
-} vs_out;
+} outVs;
 
 void main() 
 {
-    vec2 position = vec2(float(packPosition & 0xFFFFU), float(packPosition >> 16));
+    vec2 position = vec2(float(inPackPosition & 0xFFFFU), float(inPackPosition >> 16));
     vec2 normPosition = position / winSize * 2.0 - 1.0;
     gl_Position = vec4(normPosition, 0.0, 1.0);
 
-    vs_out.packSize = packSize;
-    vs_out.texOffset = float(texOffset);
+    outVs.packSize = inPackSize;
+    outVs.texOffset = float(inTexOffset);
 }"u8
         );
 
@@ -94,11 +94,11 @@ layout (std140, binding = 0) uniform WindowData
     vec2 winSizeT;
 };
 
-in VS_OUT 
+in outVS
 {
     uint packSize;
     float texOffset;
-} gs_in[];
+} inGs[];
 
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
@@ -108,10 +108,10 @@ out vec2 fTexCoords;
 void main() 
 {
     vec2 positionStart = gl_in[0].gl_Position.xy;
-    uint packSize = gs_in[0].packSize;
+    uint packSize = inGs[0].packSize;
     vec2 size = vec2(float(packSize & 0xFFFFU), float(packSize >> 16));
     vec2 normSize = size / winSize * 2.0;
-    float texStart = gs_in[0].texOffset;
+    float texStart = inGs[0].texOffset;
 
     vec2 positionEnd = positionStart + normSize;
 
@@ -119,19 +119,19 @@ void main()
     float texEnd = texStart + texLength;
     
     gl_Position = vec4(positionStart, 0.0, 1.0);
-    fTexCoords = vec2(texStart, 0);
-    EmitVertex();
-
-    gl_Position = vec4(positionEnd.x, positionStart.y, 0.0, 1.0);
-    fTexCoords = vec2(texStart, size.x);
-    EmitVertex();
-
-    gl_Position = vec4(positionStart.x, positionEnd.y, 0.0, 1.0);
     fTexCoords = vec2(texEnd, 0);
     EmitVertex();
 
-    gl_Position = vec4(positionEnd, 0.0, 1.0);
+    gl_Position = vec4(positionEnd.x, positionStart.y, 0.0, 1.0);
     fTexCoords = vec2(texEnd, size.x);
+    EmitVertex();
+
+    gl_Position = vec4(positionStart.x, positionEnd.y, 0.0, 1.0);
+    fTexCoords = vec2(texStart, 0);
+    EmitVertex();
+
+    gl_Position = vec4(positionEnd, 0.0, 1.0);
+    fTexCoords = vec2(texStart, size.x);
     EmitVertex();
 
     EndPrimitive();
@@ -147,7 +147,8 @@ in vec2 fTexCoords;
 
 out vec4 FragColor;
 
-void main() {
+void main() 
+{
     FragColor = texelFetch(atlas, int(fTexCoords.x + fTexCoords.y));
 }"u8
         );
@@ -171,7 +172,7 @@ void main() {
         public SizeU2 Size;
         public uint ImageOffset;
 
-        static void IVertex<SpriteVertex>.DesribeAttributes()
+        static void IVertex<SpriteVertex>.DescribeAttributes()
         {
             IVertex<SpriteVertex>.DesribeIntegerAttribute(0, 1, DataType.UInt, 0);
             IVertex<SpriteVertex>.DesribeIntegerAttribute(1, 1, DataType.UInt, sizeof(LocationU2));
