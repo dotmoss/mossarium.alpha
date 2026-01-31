@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Mossarium.Alpha.UI.OpenGL.Bins;
+namespace Mossarium.Alpha.UI.OpenGL.Bins.Internal;
 
-public unsafe struct DynamicArray<T> : IDisposable
+internal unsafe struct DynamicArray<T> : IDisposable
 {
     public DynamicArray() : this(4) { }
 

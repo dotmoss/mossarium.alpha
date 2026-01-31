@@ -1,6 +1,7 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.Managers;
 using Mossarium.Alpha.UI.OpenGL;
+using Mossarium.Alpha.UI.OpenGL.Bins;
 using Mossarium.Alpha.UI.Windowing;
 using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
@@ -24,6 +25,11 @@ public unsafe class Window : SystemWindow
         SendMessage(WindowMessage.NcLButtonDown, 0x02, 0x00);
     }
 
+    protected override void OnSizeChanged(int width, int height)
+    {
+        GL.Viewport(0, 0, width, height);
+    }
+
     protected virtual void OnRendererInitialized()
     {
         vertexArray = new GlVertexArray();
@@ -36,9 +42,10 @@ public unsafe class Window : SystemWindow
         ];
         vertexBuffer.Allocate(vertexes);
 
-        atlas = new GlTextureBuffer();
-        atlas.Allocate(2048 * 2048 * 4);
-        atlasRgb8View = atlas.DefineTextureRgb8();
+        atlasBuffer = new GlTextureBuffer();
+        atlasBuffer.Allocate(2048 * 2048 * 4);
+        atlasRgb8View = atlasBuffer.DefineTextureRgb8();
+        atlas = Atlas<GlTextureBuffer>.Create(atlasBuffer);
 
         var bytes = new byte[2048 * 2048 * 4];
         int counter = 0;
@@ -53,7 +60,7 @@ public unsafe class Window : SystemWindow
         }
 
         fixed (byte* bytesPointer = bytes)
-            atlas.Write(bytesPointer, 2048 * 2048 * 4, 0);
+            atlasBuffer.Write(bytesPointer, 2048 * 2048 * 4, 0);
 
         vertexShader = new GlShader(ShaderType.Vertex,
 @"#version 430 core
@@ -182,8 +189,9 @@ void main()
 
     GlVertexArray vertexArray, emptyVertexArray;
     GlArrayBuffer vertexBuffer;
-    GlTextureBuffer atlas;
+    GlTextureBuffer atlasBuffer;
     GlBufferTextureRgb8 atlasRgb8View;
+    Atlas<GlTextureBuffer>* atlas;
     GlShader vertexShader, geometryShader, fragmentShader;
     GlProgram program;
 

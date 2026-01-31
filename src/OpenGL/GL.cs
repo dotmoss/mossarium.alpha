@@ -25,7 +25,7 @@ public unsafe static partial class GL
             "glGenBuffers\0glDeleteBuffers\0glBindVertexArray\0glDeleteVertexArrays\0glBindBuffer\0glBufferData\0glBufferSubData\0"u8 +
             "glVertexAttribPointer\0glVertexAttribIPointer\0glVertexAttribDivisor\0glEnableVertexAttribArray\0glUseProgram\0wglCreateContextAttribsARB\0"u8 +
             "glAttachShader\0glLinkProgram\0glGetShaderiv\0glGetProgramiv\0glBindBufferBase\0glDeleteShader\0glDeleteProgram\0"u8 +
-            "glPushDebugGroup\0glPopDebugGroup\0glActiveTexture\0glTexStorage1D\0glTexStorage2D\0glTexBuffer"u8;
+            "glPushDebugGroup\0glPopDebugGroup\0glActiveTexture\0glTexStorage1D\0glTexStorage2D\0glTexBuffer\0glGetBufferSubData"u8;
         fixed (byte* namesPointer = names)
         {
             var pointer = namesPointer;
@@ -83,6 +83,7 @@ public unsafe static partial class GL
     static delegate* unmanaged[SuppressGCTransition]<Texture1DTarget, int, InternalFormat, int, void> glTexStorage1D;
     static delegate* unmanaged[SuppressGCTransition]<Texture2DTarget, int, InternalFormat, int, int, void> glTexStorage2D;
     static delegate* unmanaged[SuppressGCTransition]<TextureBufferTarget, InternalFormat, uint, void> glTexBuffer;
+    static delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void> glGetBufferSubData;
 
     public static void CompileShader(uint shader)
         => glCompileShader(shader);
@@ -202,6 +203,9 @@ public unsafe static partial class GL
 
     public static void TextureBuffer(TextureBufferTarget target, InternalFormat internalFormat, uint bufferId)
         => glTexBuffer(target, internalFormat, bufferId);
+
+    public static void GetBufferSubData(BufferType target, int offset, int length, void* destination)
+        => glGetBufferSubData(target, offset, length, destination);
 
     #region Imports
     [LibraryImport(gl, EntryPoint = "glBindTexture"), SuppressGCTransition] public static partial 

@@ -2,9 +2,9 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Mossarium.Alpha.UI.OpenGL.Bins;
+namespace Mossarium.Alpha.UI.OpenGL.Bins.Internal;
 
-public unsafe struct BlockList<TElement> : IDisposable
+internal unsafe struct BlockList<TElement> : IDisposable
     where TElement : unmanaged
 {
     public BlockList(uint initialCapacity)
@@ -17,6 +17,11 @@ public unsafe struct BlockList<TElement> : IDisposable
 
     DynamicArray<BlockInfo> blockInfos;
     uint freeBlockIndex;
+
+
+    public uint BlockCapacity => blockInfos.Capacity;
+    public uint BlockCount => blockInfos.Count;
+    public DynamicArray<BlockInfo> Blocks => blockInfos;
 
     public TElement* FirstElement => blockInfos[0]->Block->Elements;
 
@@ -130,7 +135,7 @@ public unsafe struct BlockList<TElement> : IDisposable
     {
         public BlockInfo(Block* block)
         {
-            Mask = 0;
+            Mask = 0xFFFFFFFFFFFFFFFFUL;
             Block = block;
         }
 
@@ -144,11 +149,11 @@ public unsafe struct BlockList<TElement> : IDisposable
                 throw null!;
 #endif
 
-            var index = (uint)BitOperations.TrailingZeroCount(~Mask);
+            var index = (uint)BitOperations.TrailingZeroCount(Mask);
             return index;
         }
 
-        public bool HasFreeSlot => Mask != 0xFFFFFFFFFFFFFFFFUL;
+        public bool HasFreeSlot => Mask != 0;
 
         public TElement* this[uint index] => Block->Elements + index;
 
@@ -156,14 +161,14 @@ public unsafe struct BlockList<TElement> : IDisposable
         {
             var index = GetFreeElementIndex();
             Block->Elements[index] = element;
-            Mask |= 1UL << (int)index;
+            Mask &= 1UL << (int)index;
 
             return index;
         }
 
         public void RemoveElement(uint index)
         {
-            Mask &= 1UL << (int)index;
+            Mask |= 1UL << (int)index;
         }
 
         public void Dispose()

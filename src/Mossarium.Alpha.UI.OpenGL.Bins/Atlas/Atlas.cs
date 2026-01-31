@@ -1,5 +1,6 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.OpenGL.Bins.Contracts;
+using Mossarium.Alpha.UI.OpenGL.Bins.Internal;
 using System.Runtime.InteropServices;
 
 namespace Mossarium.Alpha.UI.OpenGL.Bins;
@@ -9,8 +10,8 @@ public unsafe partial struct Atlas<TBuffer>
 {
     TBuffer gpuBuffer;
     uint gpuBufferLength;
-    SlotCollection slots;
     BlockList<BinTexture> textures;
+    BinTextureCollection textureCollection;
 
     void Initialize(TBuffer buffer)
     {
@@ -19,8 +20,8 @@ public unsafe partial struct Atlas<TBuffer>
         gpuBuffer = buffer;
         gpuBufferLength = InitialBuffer;
         gpuBuffer.Allocate(gpuBufferLength);
-        slots = new SlotCollection();
         textures = new BlockList<BinTexture>(16);
+        textureCollection = new BinTextureCollection(textures, gpuBufferLength);
     }
 
     public static Atlas<TBuffer>* Create(TBuffer buffer)
