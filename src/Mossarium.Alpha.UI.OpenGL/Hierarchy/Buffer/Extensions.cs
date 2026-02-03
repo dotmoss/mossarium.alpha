@@ -37,12 +37,12 @@ public unsafe static class IBufferHandleExtension
         where TData : unmanaged
         => self.Write(&data, 0, sizeof(TData));
 
-    public static void Write<TBuffer, TData>(this TBuffer self, ReadOnlySpan<TData> data, int offset)
+    public static void Write<TBuffer, TData>(this TBuffer self, ReadOnlySpan<TData> data)
         where TBuffer : IBufferHandle
         where TData : unmanaged
     {
         fixed (TData* dataPointer = data)
-            self.Write(dataPointer, offset, sizeof(TData) * data.Length);
+            self.Write(dataPointer, 0, sizeof(TData) * data.Length);
     }
 
     public static void Write<TBuffer>(this TBuffer self, void* data, int offset, int length)

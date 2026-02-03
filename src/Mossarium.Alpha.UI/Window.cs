@@ -32,20 +32,10 @@ public unsafe class Window : SystemWindow
 
     protected virtual void OnRendererInitialized()
     {
+        Atlas.Initialize();
+
         vertexArray = new GlVertexArray();
         vertexBuffer = vertexArray.DefineVertexBuffer<SpriteVertex>();
-
-        ReadOnlySpan<SpriteVertex> vertexes =
-        [
-            new SpriteVertex((50, 50), (100, 100), 0),
-            new SpriteVertex((150, 150), (16, 16), 2000)
-        ];
-        vertexBuffer.Allocate(vertexes);
-
-        atlasBuffer = new GlTextureBuffer();
-        atlasBuffer.Allocate(2048 * 2048 * 4);
-        atlasRgb8View = atlasBuffer.DefineTextureRgb8();
-        atlas = Atlas<GlTextureBuffer>.Create(atlasBuffer);
 
         var bytes = new byte[2048 * 2048 * 4];
         int counter = 0;
@@ -60,7 +50,15 @@ public unsafe class Window : SystemWindow
         }
 
         fixed (byte* bytesPointer = bytes)
-            atlasBuffer.Write(bytesPointer, 2048 * 2048 * 4, 0);
+        {
+            texture1 = BinTexture.Create(16, 16);
+            texture1->Write(bytesPointer);
+
+            texture2 = BinTexture.Create(100, 100);
+            texture1->Write(bytesPointer + 2000);
+        }
+
+        vertexBuffer.Allocate(1024);
 
         vertexShader = new GlShader(ShaderType.Vertex,
 @"#version 430 core
@@ -168,16 +166,16 @@ void main()
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x0C)]
     struct SpriteVertex : IVertex<SpriteVertex>
     {
-        public SpriteVertex(LocationU2 position, SizeU2 size, uint imageOffset)
+        public SpriteVertex(LocationU2 position, SizeU2 size, uint textureOffset)
         {
             Position = position;
             Size = size;
-            ImageOffset = imageOffset;
+            TextureOffset = textureOffset;
         }
 
         public LocationU2 Position;
         public SizeU2 Size;
-        public uint ImageOffset;
+        public uint TextureOffset;
 
         static void IVertex<SpriteVertex>.DescribeAttributes()
         {
@@ -189,11 +187,9 @@ void main()
 
     GlVertexArray vertexArray, emptyVertexArray;
     GlArrayBuffer vertexBuffer;
-    GlTextureBuffer atlasBuffer;
-    GlBufferTextureRgb8 atlasRgb8View;
-    Atlas<GlTextureBuffer>* atlas;
     GlShader vertexShader, geometryShader, fragmentShader;
     GlProgram program;
+    BinTexture* texture1, texture2;
 
     protected virtual void OnRender()
     {
@@ -207,8 +203,15 @@ void main()
         GlUniformBufferRegistry.WindowData.Write(ubWindowData);
 
         program.Use();
-        atlasRgb8View.Active(0);
         vertexArray.Bind();
+
+        ReadOnlySpan<SpriteVertex> vertexes =
+        [
+            new SpriteVertex((150, 150), (16, 16), texture2->PixelOffset),
+            new SpriteVertex((50, 50), (100, 100), texture1->PixelOffset),
+        ];
+        vertexBuffer.Write(vertexes);
+
         GL.DrawArrays(DrawMode.Points, 0, 2);
 
         GlPrograms.TransparentWindowCorners.Use();

@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DebugProfiler\DebugProfiler.csproj" />
-    <ProjectReference Include="..\Mossarium.Alpha.UI.OpenGL.Bins.Contracts\Mossarium.Alpha.UI.OpenGL.Bins.Contracts.csproj" />
+    <ProjectReference Include="..\Mossarium.Alpha.UI.OpenGL\Mossarium.Alpha.UI.OpenGL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

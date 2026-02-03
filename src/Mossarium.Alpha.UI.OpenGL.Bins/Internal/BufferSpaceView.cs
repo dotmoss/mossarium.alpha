@@ -6,117 +6,101 @@ using System.Runtime.Intrinsics.X86;
 
 namespace Mossarium.Alpha.UI.OpenGL.Bins.Internal;
 
-internal unsafe struct BufferSpaceView : IDisposable
+internal unsafe static class BufferSpaceView
 {
-    public BufferSpaceView(uint bufferLength)
+    static byte* view;
+    static BitUnit bits;
+    static BitUnit lastBit;
+    static bool firstPass;
+
+    public static void Allocate(uint bufferLength)
     {
-        var bytesCount = (bufferLength + ((1 << 11) - 1)) >> 11 << 5;
-        view = (ulong*)NativeMemory.AlignedAlloc(bytesCount, 32);
-        Unsafe.InitBlock(view, 0, bytesCount);
+        var newBits = ByteToSlot(bufferLength);
+        var bytes = FitTo32(BitToByte(newBits));
+        if (newBits != bits)
+        {
+            bits = newBits;
+            view = (byte*)NativeMemory.AlignedAlloc(bytes, 32);
+        }
+
+        Unsafe.InitBlock(view, 0, bytes);
+        firstPass = true;
     }
 
-    public ulong* view;
-
-    public unsafe uint GetSuitableIndex(uint startFromIndex, uint totalSlotCount, uint requestedSlotCount)
+    public static uint GetSuitableIndex(uint requestedSlots)
     {
-        var totalBits = totalSlotCount << 6;
-        var current = startFromIndex;
-        var checkedBits = 0U;
-
-        var ymm0 = Vector256<ulong>.AllBitsSet;
-
-    RestartSearch:
-        while (current < totalBits && checkedBits < totalBits)
+        var pointer = (ulong*)view;
+        var bits = BufferSpaceView.bits;
+        var lastBit = BufferSpaceView.lastBit;
+        
+        if (firstPass)
         {
-            var index = current >> 6;
-            var offset = (int)(current & 63);
-            if (offset == 0 && (index & 3) == 0)
+            if (requestedSlots <= bits - lastBit)
+                return lastBit;
+
+            firstPass = false;
+        }
+
+        var currentBit = lastBit;
+        var ulongIndex = currentBit >> 6;
+        int bitOffset = (int)(currentBit & 63);
+        var bitBarrier = bits - requestedSlots - 256;
+
+        while (currentBit <= bitBarrier)
+        {
+            if ((currentBit & 255) == 0)
             {
-                while (current + 256 <= totalBits && checkedBits + 256 <= totalBits)
+                while (currentBit <= bitBarrier)
                 {
-                    var ymm1 = Avx.LoadAlignedVector256(view + (current >> 6));
-                    if (Avx2.MoveMask(Avx2.CompareEqual(ymm1, ymm0).AsByte()) != -1)
-                        break;
-
-                    current += 256;
-                    checkedBits += 256;
+                    var ymm0 = Avx.LoadVector256(pointer + (currentBit >> 6));
+                    if (Avx2.CompareEqual(ymm0, Vector256<ulong>.AllBitsSet) == Vector256<ulong>.AllBitsSet)
+                    {
+                        currentBit += 256;
+                        continue;
+                    }
+                    break;
                 }
-
-                if (current >= totalBits)
-                    goto HandleWrap;
-
-                index = current >> 6;
             }
 
-            var currentValue = ~(view[index] >> (int)(current & 63));
-            if (currentValue == 0)
-            {
-                var skip = 64 - (current & 63U);
-                current += skip;
-                checkedBits += skip;
-                if (current >= totalBits)
-                    goto HandleWrap;
+            var value = pointer[currentBit >> 6] >> (int)(currentBit & 63);
+            var longRemaining = 64 - (int)(currentBit & 63);
 
+            if ((value & 1) != 0)
+            {
+                var firstZero = (uint)Bmi1.X64.TrailingZeroCount(~value);
+                currentBit += firstZero;
                 continue;
             }
 
-            var zeros = (uint)BitOperations.TrailingZeroCount(currentValue);
-            current += zeros;
-            checkedBits += zeros;
-            if (current >= totalBits)
-                goto HandleWrap;
-
             var found = 0U;
-            while (found < requestedSlotCount)
+            var checkIndex = currentBit;
+            while (found < requestedSlots && checkIndex < bits)
             {
-                var absolutePosition = current + found;
-                if (absolutePosition >= totalBits)
-                {
-                    checkedBits += (totalBits - current);
-                    current = 0;
-                    goto RestartSearch;
-                }
+                var block = pointer[checkIndex >> 6] >> (int)(checkIndex & 63);
+                var limit = 64 - (checkIndex & 63);
 
-                var value = view[absolutePosition >> 6] >> (int)(absolutePosition & 63);
-                if (value == 0)
-                {
-                    found += 64 - (absolutePosition & 63);
-                }
-                else
-                {
-                    found += (uint)BitOperations.TrailingZeroCount(value);
-                    if (found >= requestedSlotCount)
-                        return current;
+                var zeros = (uint)Bmi1.X64.TrailingZeroCount(block);
+                var iterationFound = Math.Min(zeros, limit);
 
-                    var failSkip = found + 1;
-                    current += failSkip;
-                    checkedBits += failSkip;
+                found += iterationFound;
+                checkIndex += iterationFound;
 
-                    if (current >= totalBits)
-                        goto HandleWrap;
-
-                    goto NextIteration;
-                }
+                if (iterationFound < limit) 
+                    break;
             }
 
-            if (found >= requestedSlotCount)
-                return current;
+            if (found >= requestedSlots)
+                return currentBit;
 
-            NextIteration:;
+            currentBit = checkIndex + 1;
         }
 
-    HandleWrap:
-        if (checkedBits < totalBits)
-        {
-            current = 0;
-            goto RestartSearch;
-        }
-
-        return uint.MaxValue;
+        return 0xFFFFFFFF;
     }
 
-    public unsafe void NotifyOccupied(uint slotPosition, uint slotCount)
+    public static void NotifyOccupied(uint slotPosition, uint slotCount)
     {
+        var pointer = (ulong*)view;
         var startIndex = slotPosition >> 6;
         var positionLength = slotPosition + slotCount - 1;
         var endIndex = positionLength >> 6;
@@ -126,31 +110,32 @@ internal unsafe struct BufferSpaceView : IDisposable
 
         if (startIndex == endIndex)
         {
-            view[startIndex] |= startMask & endMask;
+            pointer[startIndex] |= startMask & endMask;
             return;
         }
 
-        view[startIndex] |= startMask;
-        view[endIndex] |= endMask;
+        pointer[startIndex] |= startMask;
+        pointer[endIndex] |= endMask;
 
         var current = startIndex + 1;
 
         while (current < endIndex && (current & 3) != 0)
-            view[current++] = ulong.MaxValue;
+            pointer[current++] = ulong.MaxValue;
 
         var ymm0 = Vector256<ulong>.AllBitsSet;
         while (current + 4 <= endIndex)
         {
-            ymm0.Store(view + current);
+            ymm0.Store(pointer + current);
             current += 4;
         }
 
         while (current < endIndex)
-            view[current++] = ulong.MaxValue;
+            pointer[current++] = ulong.MaxValue;
     }
 
-    public unsafe void NotifyReleased(uint slotPosition, uint slotCount)
+    public static void NotifyReleased(uint slotPosition, uint slotCount)
     {
+        var pointer = (ulong*)view;
         var startIndex = slotPosition >> 6;
         var positionLength = slotPosition + slotCount - 1;
         var endIndex = positionLength >> 6;
@@ -160,31 +145,26 @@ internal unsafe struct BufferSpaceView : IDisposable
 
         if (startIndex == endIndex)
         {
-            view[startIndex] &= ~(startMask & endMask);
+            pointer[startIndex] &= ~(startMask & endMask);
             return;
         }
 
-        view[startIndex] &= ~startMask;
-        view[endIndex] &= ~endMask;
+        pointer[startIndex] &= ~startMask;
+        pointer[endIndex] &= ~endMask;
 
         var current = startIndex + 1;
 
         while (current < endIndex && (current & 3) != 0)
-            view[current++] = 0;
+            pointer[current++] = 0;
 
         var ymm0 = Vector256<ulong>.Zero;
         while (current + 4 <= endIndex)
         {
-            ymm0.Store(view + current);
+            ymm0.Store(pointer + current);
             current += 4;
         }
 
         while (current < endIndex)
-            view[current++] = 0;
-    }
-
-    public void Dispose()
-    {
-        NativeMemory.AlignedFree(view);
+            pointer[current++] = 0;
     }
 }
