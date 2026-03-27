@@ -2,7 +2,7 @@
 
 namespace DebugProfiler.Internal;
 
-internal class FrameCollection
+class FrameCollection
 {
     protected FrameCollection() { }
 
@@ -27,7 +27,7 @@ internal class FrameCollection
     }
 }
 
-internal unsafe class FrameCollection<T> : FrameCollection
+unsafe class FrameCollection<T> : FrameCollection
     where T : struct, Enum
 {
     FrameCollection() { }

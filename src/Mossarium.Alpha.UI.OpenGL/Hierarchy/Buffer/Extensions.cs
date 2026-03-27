@@ -12,11 +12,6 @@ public unsafe static class IBufferHandleExtension
         where TBuffer : IBufferHandle
         => self.Allocate(null, length);
 
-    public static void Allocate<TBuffer, TData>(this TBuffer self, TData data)
-        where TBuffer : IBufferHandle
-        where TData : unmanaged
-        => self.Allocate(&data, sizeof(TData));
-
     public static void Allocate<TBuffer, TData>(this TBuffer self, ReadOnlySpan<TData> data)
         where TBuffer : IBufferHandle
         where TData : unmanaged

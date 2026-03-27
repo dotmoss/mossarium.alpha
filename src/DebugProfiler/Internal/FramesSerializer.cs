@@ -2,7 +2,7 @@
 
 namespace DebugProfiler.Internal;
 
-internal static class FramesSerializer
+static class FramesSerializer
 {
     public static string Serialize()
     {

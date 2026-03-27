@@ -1,5 +1,6 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.Managers;
+using Mossarium.Alpha.Utils;
 using Mossarium.Alpha.Windows;
 
 namespace Mossarium.Alpha;
@@ -16,6 +17,7 @@ unsafe class Program
         Profiler.Register<ProfileStage>("Application");
         Profiler.Push(ProfileStage.UIInitialization);
 
+        Intrinsics.Verify();
         var window = new ApplicationWindow();
 
         WindowManager.InitializeWindow(window);

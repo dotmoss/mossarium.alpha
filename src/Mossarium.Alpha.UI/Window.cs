@@ -32,7 +32,7 @@ public unsafe class Window : SystemWindow
 
     protected virtual void OnRendererInitialized()
     {
-        Atlas.Initialize();
+        Atlas.Initialize<GlTextures.StaticTexturesInitializer>();
 
         vertexArray = new GlVertexArray();
         vertexBuffer = vertexArray.DefineVertexBuffer<SpriteVertex>();
@@ -41,9 +41,9 @@ public unsafe class Window : SystemWindow
         int counter = 0;
         for (var i = 0; i < 2048 * 2048 * 4; i += 4)
         {
-            bytes[i] = (byte)(counter % byte.MaxValue);
-            bytes[i + 1] = (byte)(counter % byte.MaxValue);
-            bytes[i + 2] = (byte)(counter % byte.MaxValue);
+            bytes[i] = (byte)(counter & byte.MaxValue);
+            bytes[i + 1] = (byte)(counter & byte.MaxValue);
+            bytes[i + 2] = (byte)(counter & byte.MaxValue);
             bytes[i + 3] = byte.MaxValue;
 
             counter++;
@@ -51,15 +51,15 @@ public unsafe class Window : SystemWindow
 
         fixed (byte* bytesPointer = bytes)
         {
-            texture1 = BinTexture.Create(16, 16);
-            texture1->Write(bytesPointer);
+            texture1 = BinTexture.Create(32, 8);
+            texture1.Write(bytesPointer);
 
             texture2 = BinTexture.Create(100, 100);
-            texture1->Write(bytesPointer + 2000);
+            texture2.Write(bytesPointer + 2000);
         }
 
         vertexBuffer.Allocate(1024);
-
+        
         vertexShader = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
@@ -121,22 +121,23 @@ void main()
     vec2 positionEnd = positionStart + normSize;
 
     float texLength = size.x * size.y;
-    float texEnd = texStart + texLength;
+    float halfX = size.x / 2.0;
+    float texEnd = texStart + texLength - halfX;
     
     gl_Position = vec4(positionStart, 0.0, 1.0);
-    fTexCoords = vec2(texEnd, 0);
+    fTexCoords = vec2(0, texEnd);
     EmitVertex();
 
     gl_Position = vec4(positionEnd.x, positionStart.y, 0.0, 1.0);
-    fTexCoords = vec2(texEnd, size.x);
+    fTexCoords = vec2(size.x, texEnd);
     EmitVertex();
-
+    
     gl_Position = vec4(positionStart.x, positionEnd.y, 0.0, 1.0);
-    fTexCoords = vec2(texStart, 0);
+    fTexCoords = vec2(0, -halfX);
     EmitVertex();
 
     gl_Position = vec4(positionEnd, 0.0, 1.0);
-    fTexCoords = vec2(texStart, size.x);
+    fTexCoords = vec2(size.x, -halfX);
     EmitVertex();
 
     EndPrimitive();
@@ -159,8 +160,12 @@ void main()
         );
 
         program = new GlProgram(vertexShader, geometryShader, fragmentShader);
-
+        
         emptyVertexArray = new GlVertexArray();
+        
+        vertexShader.Dispose();
+        geometryShader.Dispose();
+        fragmentShader.Dispose();
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 0x0C)]
@@ -189,7 +194,7 @@ void main()
     GlArrayBuffer vertexBuffer;
     GlShader vertexShader, geometryShader, fragmentShader;
     GlProgram program;
-    BinTexture* texture1, texture2;
+    BinTexture texture1, texture2;
 
     protected virtual void OnRender()
     {
@@ -204,13 +209,13 @@ void main()
 
         program.Use();
         vertexArray.Bind();
-
+        
         ReadOnlySpan<SpriteVertex> vertexes =
         [
-            new SpriteVertex((150, 150), (16, 16), texture2->PixelOffset),
-            new SpriteVertex((50, 50), (100, 100), texture1->PixelOffset),
+            new SpriteVertex((150, 150), (32, 8), texture1.PixelOffset),
+            new SpriteVertex((50, 50), (100, 100), texture2.PixelOffset),
         ];
-        vertexBuffer.Write(vertexes);
+        vertexBuffer.Write(vertexes);        
 
         GL.DrawArrays(DrawMode.Points, 0, 2);
 

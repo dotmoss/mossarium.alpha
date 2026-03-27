@@ -1,7 +1,4 @@
-﻿using Mossarium.Alpha.UI.OpenGL.Bins.Internal;
-using System.Runtime.CompilerServices;
-
-namespace Mossarium.Alpha.UI.OpenGL.Bins;
+﻿namespace Mossarium.Alpha.UI.OpenGL.Bins;
 
 public unsafe struct BinTexture
 {
@@ -12,27 +9,11 @@ public unsafe struct BinTexture
     public void Write(void* source)
     {
         var offset = (int)PixelToByte(PixelOffset);
-        var length = (int)PixelToByte(PixelOffset);
+        var length = (int)PixelToByte((PixelUnit)Width * Height);
         Atlas.buffer.Write(source, offset, length);
     }
 
-    public void Delete()
-    {
-        var position = PixelToSlot(PixelOffset);
-        var size = PixelToSlotFit((PixelUnit)Width * Height);
-        BufferSpaceView.NotifyReleased(position, size);
+    public void Delete() => Atlas.DeallocateTexture(this);
 
-        BinTextureCollection.RemoveTexture((BinTexture*)Unsafe.AsPointer(ref this));
-    }
-
-    public static BinTexture* Create(PixelUnit width, PixelUnit height)
-    {
-        var bytes = PixelToByte(width * height);
-        var slots = ByteToSlotFit(bytes);
-
-        var texture = Atlas.AllocateTexture(slots);
-        texture->Width = (ushort)width;
-        texture->Height = (ushort)height;
-        return texture;
-    }
+    public static BinTexture Create(PixelUnit width, PixelUnit height) => Atlas.AllocateTexture(width, height);
 }

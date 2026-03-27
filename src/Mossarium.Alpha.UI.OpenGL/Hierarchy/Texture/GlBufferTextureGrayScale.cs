@@ -4,7 +4,7 @@ namespace Mossarium.Alpha.UI.OpenGL;
 
 public unsafe struct GlBufferTextureGrayScale : ITexture1D
 {
-    public GlBufferTextureGrayScale(int width)
+    public GlBufferTextureGrayScale()
     {
         uint id;
         GL.GenerateTextures(1, &id);

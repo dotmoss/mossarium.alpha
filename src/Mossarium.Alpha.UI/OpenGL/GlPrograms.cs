@@ -20,7 +20,17 @@ public static class GlPrograms
         }
     }
 
-    public static void Initialize()
+    static void DisposeShaders()
+    {
+        Shader.Vertex.GradientRgbTriangles.Dispose();
+        Shader.Vertex.GeneratedRectangle.Dispose();
+        Shader.Vertex.TransparentWindowCorners.Dispose();
+        Shader.Fragment.RgbToRgba.Dispose();
+        Shader.Fragment.RoundedCorners.Dispose();
+        Shader.Fragment.TransparentWindowCorners.Dispose();
+    }
+
+    public static void Initialize() 
     {
         Profiler.Push(ProfileStage.GlProgramsCompilation);
 
@@ -200,6 +210,8 @@ void main()
             Shader.Vertex.TransparentWindowCorners,
             Shader.Fragment.TransparentWindowCorners
         );
+
+        DisposeShaders();
 
         Profiler.Pop();
     }

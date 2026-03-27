@@ -7,75 +7,101 @@ namespace Mossarium.Alpha.UI.OpenGL.Bins;
 public unsafe static partial class Atlas
 {
     internal static GlTextureBuffer buffer;
-    internal static uint bufferLength;
+    internal const uint staticBufferLength = 4096;
+    internal static uint dynamicBufferLength;
+    internal static uint totalBufferLength => staticBufferLength + dynamicBufferLength;
 
-    public static void Initialize()
+    public static void Initialize<TInitializer>()
+        where TInitializer : IStaticTexturesInitializer
     {
         const uint GlobalAtlasTextureBindingIndex = 0;
 
         Profiler.Push(ProfileStage.AtlasInitialization);
 
         buffer = new GlTextureBuffer();
-        bufferLength = PixelToByte(2048 * 2048);
-        buffer.Allocate(bufferLength);
+        Allocate(PixelToByte(2048 * 2048));
 
-        var bufferTextureRgb8View = buffer.DefineTextureRgb8();
-        bufferTextureRgb8View.Active(GlobalAtlasTextureBindingIndex);
+        buffer.DefineTextureRgb8().Active(GlobalAtlasTextureBindingIndex);
 
-        BufferSpaceView.Allocate(bufferLength);
+        InitializeStaticTextures<TInitializer>();
 
         Profiler.Pop();
     }
 
-    internal static BinTexture* AllocateTexture(SlotUnit slots)
+    static void InitializeStaticTextures<TInitializer>()
+        where TInitializer : IStaticTexturesInitializer
     {
-        var slotIndex = BufferSpaceView.GetSuitableIndex(slots);
-        if (slotIndex == uint.MaxValue)
+        Profiler.Push(ProfileStage.AtlasInitialization);
+
+        var staticTextures = new StaticTextures();
+        TInitializer.InitializeStaticTextures(&staticTextures);
+
+        if (Profiler.IsEnabled)
         {
-            GarbageCollect(Atlas.bufferLength, Atlas.bufferLength <<= 1);
-            return AllocateTexture(slots);
+            var percentUsage = Math.Round((float)staticTextures.currentBufferPosition / staticBufferLength * 100, 2);
+            Profiler.Log($"Static texture buffer usage: {staticTextures.currentBufferPosition} of {staticBufferLength} ({percentUsage}%)");
         }
 
-        BufferSpaceView.NotifyOccupied(slotIndex, slots);
+        Profiler.Pop();
+    }
 
-        var textureData = new BinTexture();
-        textureData.PixelOffset = SlotToPixel(slotIndex);
+    static void Allocate(uint length)
+    {
+        dynamicBufferLength = length;
+        buffer.Allocate((int)totalBufferLength);
 
-        var texture = BinTextureCollection.AddTexture(textureData);
+        GpuBufferSpaceView.Allocate(dynamicBufferLength);
+    }
+
+    static void Reallocate(uint length)
+    {
+        var oldBufferLength = totalBufferLength;
+        dynamicBufferLength = length;
+
+        var oldBufferData = NativeMemory.AlignedAlloc(oldBufferLength, 4096);
+        buffer.Read(oldBufferData, 0, (int)oldBufferLength);
+        buffer.Allocate((int)totalBufferLength);
+        buffer.Write(oldBufferData, 0, (int)oldBufferLength);
+        NativeMemory.AlignedFree(oldBufferData);
+
+        GpuBufferSpaceView.Reallocate(dynamicBufferLength);
+    }
+
+    static void Expand()
+    {
+        Reallocate(dynamicBufferLength + PixelToByte(512 * 512));
+    }
+
+    internal static BinTexture AllocateTexture(PixelUnit width, PixelUnit height)
+    {
+        var bytes = PixelToByte(width * height);
+        var slots = ByteToSlotFit(bytes);
+
+        var slotIndex = GpuBufferSpaceView.GetSuitableSpace(slots);
+        if (slotIndex == uint.MaxValue)
+        {
+            Expand();
+            return AllocateTexture(width, height);
+        }
+
+        GpuBufferSpaceView.OccupySpace(slotIndex, slots);
+
+        var texture = new BinTexture
+        {
+            PixelOffset = ByteToPixel(SlotToByte(slotIndex) + staticBufferLength),
+            Width = (ushort)width,
+            Height = (ushort)height
+        };
+
         return texture;
     }
 
-    internal static void GarbageCollect(uint oldBufferLength, uint newBufferLength)
+    internal static void DeallocateTexture(BinTexture texture)
     {
-        var oldBufferData = NativeMemory.AlignedAlloc(oldBufferLength, 4096);
-        buffer.Read(oldBufferData, 0, (int)oldBufferLength);
+        var position = ByteToSlot(PixelToByte(texture.PixelOffset) - staticBufferLength);
+        var size = PixelToSlotFit((PixelUnit)texture.Width * texture.Height);
 
-        buffer.Allocate(newBufferLength);
-
-        BufferSpaceView.Allocate(newBufferLength);
-        var blocks = BinTextureCollection.blocks;
-        for (uint blockIndex = 0, textureIndex = 0; blockIndex < BinTextureCollection.blockCount; blockIndex++)
-        {
-            var block = blocks + blockIndex;
-            for (var textureLocalIndex = 0U; textureLocalIndex < 64; textureLocalIndex++)
-            {
-                if (!block->HasTextureAt(textureLocalIndex))
-                    continue;
-
-                var oldTexture = block->Get(textureLocalIndex);
-                var textureSize = (PixelUnit)oldTexture->Width * oldTexture->Height;
-
-                var newTexture = AllocateTexture(PixelToSlotFit(textureSize));
-                newTexture->Width = oldTexture->Width;
-                newTexture->Height = oldTexture->Height;
-
-                var offset = PixelToByte(oldTexture->PixelOffset);
-                var source = (byte*)oldBufferData + offset;
-                newTexture->Write(source);
-
-                textureIndex++;
-            }
-        }
+        GpuBufferSpaceView.ReleaseSpace(position, size);
     }
 
     static Atlas()

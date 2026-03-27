@@ -1,4 +1,5 @@
 ﻿enum ProfileStage
 {
-    AtlasInitialization
+    AtlasInitialization,
+    AtlasStaticTexturesInitialization
 }
