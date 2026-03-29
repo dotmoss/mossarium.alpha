@@ -29,7 +29,7 @@ public unsafe static class WindowGlContext
             AlphaBits = 0,
             LayerType = LayerTypeEnum.MainPlane,
             DepthBits = 24,
-            StencilBits = 8
+            StencilBits = 0
         };
         var pixelFormat = GDI32.ChoosePixelFormat(deviceContextHandle, &pixelFormatDescriptor);
         if (pixelFormat == 0)

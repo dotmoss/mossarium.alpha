@@ -1,4 +1,5 @@
 ﻿using DebugProfiler;
+using OpenGL.Enumerations;
 using System.Runtime.InteropServices;
 using WindowsOS;
 
@@ -25,7 +26,8 @@ public unsafe static partial class GL
             "glGenBuffers\0glDeleteBuffers\0glBindVertexArray\0glDeleteVertexArrays\0glBindBuffer\0glBufferData\0glBufferSubData\0"u8 +
             "glVertexAttribPointer\0glVertexAttribIPointer\0glVertexAttribDivisor\0glEnableVertexAttribArray\0glUseProgram\0wglCreateContextAttribsARB\0"u8 +
             "glAttachShader\0glLinkProgram\0glGetShaderiv\0glGetProgramiv\0glBindBufferBase\0glDeleteShader\0glDeleteProgram\0"u8 +
-            "glPushDebugGroup\0glPopDebugGroup\0glActiveTexture\0glTexStorage1D\0glTexStorage2D\0glTexBuffer\0glGetBufferSubData"u8;
+            "glPushDebugGroup\0glPopDebugGroup\0glActiveTexture\0glTexStorage1D\0glTexStorage2D\0glTexBuffer\0glGetBufferSubData\0glGetProgramBinary\0"u8 +
+            "glProgramBinary\0glProgramParameteri"u8;
         fixed (byte* namesPointer = names)
         {
             var pointer = namesPointer;
@@ -84,6 +86,9 @@ public unsafe static partial class GL
     static delegate* unmanaged[SuppressGCTransition]<Texture2DTarget, int, InternalFormat, int, int, void> glTexStorage2D;
     static delegate* unmanaged[SuppressGCTransition]<TextureBufferTarget, InternalFormat, uint, void> glTexBuffer;
     static delegate* unmanaged[SuppressGCTransition]<BufferType, int, int, void*, void> glGetBufferSubData;
+    static delegate* unmanaged[SuppressGCTransition]<uint, int, int*, uint*, void*, void> glGetProgramBinary;
+    static delegate* unmanaged[SuppressGCTransition]<uint, uint, void*, int, void> glProgramBinary;
+    static delegate* unmanaged[SuppressGCTransition]<uint, ProgramParameterName, int, void> glProgramParameteri;
 
     public static void CompileShader(uint shader)
         => glCompileShader(shader);
@@ -171,6 +176,12 @@ public unsafe static partial class GL
     public static void GetProgramLinkStatus(uint program, bool* isSuccess)
         => glGetProgramiv(program, ProgramStatusName.LinkStatus, (int*)isSuccess);
 
+    public static void GetProgramBinaryRetrievableHint(uint program, bool* isSuccess)
+        => glGetProgramiv(program, ProgramStatusName.BinaryRetrievableHint, (int*)isSuccess);
+
+    public static void GetProgramBinaryLength(uint program, int* length)
+        => glGetProgramiv(program, ProgramStatusName.BinaryLength, length);
+
     public static void BindBufferBase(BufferType target, uint baseIndex, uint bufferIndex)
         => glBindBufferBase(target, baseIndex, bufferIndex);
 
@@ -206,6 +217,18 @@ public unsafe static partial class GL
 
     public static void GetBufferSubData(BufferType target, int offset, int length, void* destination)
         => glGetBufferSubData(target, offset, length, destination);
+
+    public static void GetProgramBinary(uint program, int bufferSize, int* length, uint* binaryFormat, void* binary)
+        => glGetProgramBinary(program, bufferSize, length, binaryFormat, binary);
+
+    public static void ProgramBinary(uint program, uint binaryFormat, void* binary, int binaryLength)
+        => glProgramBinary(program, binaryFormat, binary, binaryLength);
+
+    public static void ProgramParameteri(uint program, ProgramParameterName parameterName, int value)
+        => glProgramParameteri(program, parameterName, value);
+
+    public static void ProgramParameteri(uint program, ProgramParameterName parameterName, bool value)
+        => glProgramParameteri(program, parameterName, *(int*)&value);
 
     #region Imports
     [LibraryImport(gl, EntryPoint = "glBindTexture"), SuppressGCTransition] public static partial 

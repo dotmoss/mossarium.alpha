@@ -2,6 +2,7 @@
 using Mossarium.Alpha.UI.Managers;
 using Mossarium.Alpha.UI.OpenGL;
 using Mossarium.Alpha.UI.OpenGL.Bins;
+using Mossarium.Alpha.UI.OpenGL.Programs;
 using Mossarium.Alpha.UI.Windowing;
 using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;

@@ -1,40 +1,54 @@
-﻿using DebugProfiler;
+﻿#if DEBUG
+#define Define_Disable_OpenGL_Shaders_Cache
+#endif
+
+using DebugProfiler;
+using Mossarium.Alpha.UI.OpenGL.Programs.Internal;
 using OpenGL;
+using System.Runtime.CompilerServices;
 
-namespace Mossarium.Alpha.UI.OpenGL;
+namespace Mossarium.Alpha.UI.OpenGL.Programs;
 
-public static class GlPrograms
+public unsafe class GlPrograms
 {
-    public static GlProgram GradientRgbTriangles, RoundedWindowRectangle, TransparentWindowCorners;
-
-    public static class Shader
+    public static void Initialize(ulong cacheVersion)
     {
-        public static class Vertex
-        {
-            public static GlShader GradientRgbTriangles, GeneratedRectangle, TransparentWindowCorners;
-        }
+        var cacheFilePath = Path.Combine(Path.GetTempPath(), $"da43ff68-6d81-4389-9fb1-1fedb101b8eb-{cacheVersion:x}");
 
-        public static class Fragment
+#if !Define_Disable_OpenGL_Shaders_Cache
+        if (File.Exists(cacheFilePath))
         {
-            public static GlShader RgbToRgba, RoundedCorners, TransparentWindowCorners;
+            LoadFromCache(cacheFilePath);
+            return;
         }
+#endif
+        Compile(cacheFilePath);        
     }
 
-    static void DisposeShaders()
+    static void LoadFromCache(string cacheFile)
     {
-        Shader.Vertex.GradientRgbTriangles.Dispose();
-        Shader.Vertex.GeneratedRectangle.Dispose();
-        Shader.Vertex.TransparentWindowCorners.Dispose();
-        Shader.Fragment.RgbToRgba.Dispose();
-        Shader.Fragment.RoundedCorners.Dispose();
-        Shader.Fragment.TransparentWindowCorners.Dispose();
+        Profiler.Push(ProfileStage.GlProgramsCacheLoading);
+
+        Unsafe.SkipInit(out GlProgramsCacheReader cache);
+        cache.SetFilePath(cacheFile);
+
+        GradientRgbTriangles = cache.Read();
+        RoundedWindowRectangle = cache.Read();
+        TransparentWindowCorners = cache.Read();
+        cache.Dispose();
+
+        Profiler.Pop();
     }
 
-    public static void Initialize() 
+    static void Compile(string cacheFile)
     {
         Profiler.Push(ProfileStage.GlProgramsCompilation);
 
-        Shader.Vertex.GradientRgbTriangles = new GlShader(ShaderType.Vertex,
+        Unsafe.SkipInit(out GlProgramsCacheWriter cache);
+        cache.SetFilePath(cacheFile);
+
+        {
+            using var vertex = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData
@@ -59,7 +73,8 @@ void main()
     fragColor = inColor;
 }"u8);
 
-        Shader.Fragment.RgbToRgba = new GlShader(ShaderType.Fragment,
+
+            using var fragment = new GlShader(ShaderType.Fragment,
 @"#version 430 core
 
 in vec3 fragColor;
@@ -70,13 +85,12 @@ void main()
 {
     outColor = vec4(fragColor, 1.0);
 }"u8);
+            GradientRgbTriangles = new GlProgram(vertex, fragment);
+            cache.Write(GradientRgbTriangles);
+        }
 
-        GradientRgbTriangles = new GlProgram(
-            Shader.Vertex.GradientRgbTriangles,
-            Shader.Fragment.RgbToRgba
-        );
-
-        Shader.Vertex.GeneratedRectangle = new GlShader(ShaderType.Vertex,
+        {
+            using var vertex = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -105,8 +119,8 @@ void main()
     );
 }"u8);
 
-        Shader.Fragment.RoundedCorners = new GlShader(ShaderType.Fragment,
-@"#version 430 core
+            using var fragment = new GlShader(ShaderType.Fragment,
+    @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
 {
@@ -149,12 +163,14 @@ void main()
     outColor = vec4(inColor, smoothedAlpha);
 }"u8);
 
-        RoundedWindowRectangle = new GlProgram(
-            Shader.Vertex.GeneratedRectangle,
-            Shader.Fragment.RoundedCorners
-        );
+            cache.Write(RoundedWindowRectangle = new GlProgram(
+                vertex,
+                fragment
+            ));
+        }
 
-        Shader.Vertex.TransparentWindowCorners = new GlShader(ShaderType.Vertex,
+        {
+            using var vertex = new GlShader(ShaderType.Vertex,
 @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
@@ -182,8 +198,8 @@ void main()
     );
 }"u8);
 
-        Shader.Fragment.TransparentWindowCorners = new GlShader(ShaderType.Fragment,
-@"#version 430 core
+            using var fragment = new GlShader(ShaderType.Fragment,
+    @"#version 430 core
 
 layout (std140, binding = 0) uniform WindowData 
 {
@@ -206,13 +222,16 @@ void main()
     outColor = vec4(inColor, distance);
 }"u8);
 
-        TransparentWindowCorners = new GlProgram(
-            Shader.Vertex.TransparentWindowCorners,
-            Shader.Fragment.TransparentWindowCorners
-        );
+            cache.Write(TransparentWindowCorners = new GlProgram(
+                vertex,
+                fragment
+            ));
+        }
 
-        DisposeShaders();
+        cache.Dispose();
 
         Profiler.Pop();
     }
+
+    public static GlProgram GradientRgbTriangles, RoundedWindowRectangle, TransparentWindowCorners;
 }

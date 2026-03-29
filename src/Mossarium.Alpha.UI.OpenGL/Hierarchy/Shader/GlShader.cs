@@ -9,7 +9,6 @@ public unsafe struct GlShader : IObjectHandle
         ID = GL.CreateShader(type);
         GL.ShaderSource(ID, sourceCode);
         GL.CompileShader(ID);
-        // no delete shader source?
 
 #if DEBUG
         bool success;

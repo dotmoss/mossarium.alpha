@@ -1,5 +1,6 @@
 ﻿using DebugProfiler;
 using Mossarium.Alpha.UI.OpenGL;
+using Mossarium.Alpha.UI.OpenGL.Programs;
 using Mossarium.Alpha.UI.Windowing.Structures;
 using OpenGL;
 
@@ -23,7 +24,8 @@ public unsafe static class OpenGlManager
             Profiler.Push(ProfileStage.FirstWindowGlContextInitialization);
             WindowGlContext.InitializeContext(window.DeviceContextHandle);
             GlUniformBufferRegistry.Initialize();
-            GlPrograms.Initialize();
+
+            GlPrograms.Initialize(0);
             SetupInitialStates();
             Profiler.Pop();
         }
