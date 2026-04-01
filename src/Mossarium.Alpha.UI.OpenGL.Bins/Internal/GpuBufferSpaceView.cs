@@ -81,7 +81,7 @@ internal unsafe static class GpuBufferSpaceView
                     var zeros = leftZeros + rightZeros;
                     if (leftZeros + rightZeros >= slotsToFound)
                     {
-                        bitPosition += 64 - (uint)leftZeros;
+                        //bitPosition += 64 - (uint)leftZeros;
                         goto Found;
                     }
 

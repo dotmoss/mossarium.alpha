@@ -56,7 +56,7 @@ public unsafe class Window : SystemWindow
             texture1.Write(bytesPointer);
 
             texture2 = BinTexture.Create(100, 100);
-            texture2.Write(bytesPointer + 2000);
+            texture2.Write(bytesPointer);
         }
 
         vertexBuffer.Allocate(1024);
@@ -110,7 +110,7 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 out vec2 fTexCoords;
- 
+
 void main() 
 {
     vec2 positionStart = gl_in[0].gl_Position.xy;
@@ -118,13 +118,14 @@ void main()
     vec2 size = vec2(float(packSize & 0xFFFFU), float(packSize >> 16));
     vec2 normSize = size / winSize * 2.0;
     float texStart = inGs[0].texOffset;
-
-    vec2 positionEnd = positionStart + normSize;
-
+    
     float texLength = size.x * size.y;
     float halfX = size.x / 2.0;
-    float texEnd = texStart + texLength - halfX;
-    
+
+    vec2 positionEnd = positionStart + normSize;
+    float texStrideEnd = texStart - halfX;
+    float texEnd = texStrideEnd + texLength;
+
     gl_Position = vec4(positionStart, 0.0, 1.0);
     fTexCoords = vec2(0, texEnd);
     EmitVertex();
@@ -132,13 +133,13 @@ void main()
     gl_Position = vec4(positionEnd.x, positionStart.y, 0.0, 1.0);
     fTexCoords = vec2(size.x, texEnd);
     EmitVertex();
-    
+        
     gl_Position = vec4(positionStart.x, positionEnd.y, 0.0, 1.0);
-    fTexCoords = vec2(0, -halfX);
+    fTexCoords = vec2(0, texStrideEnd);
     EmitVertex();
 
     gl_Position = vec4(positionEnd, 0.0, 1.0);
-    fTexCoords = vec2(size.x, -halfX);
+    fTexCoords = vec2(size.x, texStrideEnd);
     EmitVertex();
 
     EndPrimitive();
@@ -154,9 +155,9 @@ in vec2 fTexCoords;
 
 out vec4 FragColor;
 
-void main() 
+void main()
 {
-    FragColor = texelFetch(atlas, int(fTexCoords.x + fTexCoords.y));
+    FragColor = texelFetch(atlas, int(fTexCoords.x) + int(fTexCoords.y));
 }"u8
         );
 

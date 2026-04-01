@@ -17,7 +17,6 @@ public unsafe struct GlProgram : IObjectHandle
         if (!isSuccess)
             throw null!;
 #endif
-
     }
 
     public GlProgram(params ReadOnlySpan<GlShader> shaders)
@@ -48,9 +47,9 @@ public unsafe struct GlProgram : IObjectHandle
             throw null!;
 #endif
 
-#if DEBUG
         int length;
         GL.GetProgramBinaryLength(ID, &length);
+#if DEBUG
         if (length < 0 || length > bufferLength)
             throw null!;
 #endif

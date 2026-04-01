@@ -7,7 +7,7 @@ namespace Mossarium.Alpha.UI.OpenGL.Bins;
 public unsafe static partial class Atlas
 {
     internal static GlTextureBuffer buffer;
-    internal const uint staticBufferLength = 4096;
+    internal const uint staticBufferLength = 1024;
     internal static uint dynamicBufferLength;
     internal static uint totalBufferLength => staticBufferLength + dynamicBufferLength;
 
